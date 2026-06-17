@@ -1,0 +1,19 @@
+<svg class="gradient-background" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+        <defs>
+            <radialGradient id="grad1" cx="30%" cy="30%" r="50%" fx="30%" fy="30%">
+                <stop offset="0%" style="stop-color:rgba(255, 145, 0, 0.1); stop-opacity:1" />
+                <stop offset="100%" style="stop-color:rgba(255, 0, 0, 0); stop-opacity:0" />
+            </radialGradient>
+            <radialGradient id="grad2" cx="70%" cy="30%" r="50%" fx="70%" fy="30%">
+                <stop offset="0%" style="stop-color:rgba(0, 255, 255, 0.1); stop-opacity:1" />
+                <stop offset="100%" style="stop-color:rgba(0, 255, 255, 0); stop-opacity:0" />
+            </radialGradient>
+            <radialGradient id="grad3" cx="50%" cy="70%" r="50%" fx="50%" fy="70%">
+                <stop offset="0%" style="stop-color:rgba(0, 0, 255, 0.1); stop-opacity:1" />
+                <stop offset="100%" style="stop-color:rgba(0, 0, 255, 0); stop-opacity:0" />
+            </radialGradient>
+        </defs>
+        <rect width="800" height="600" fill="url(#grad1)" />
+        <rect width="800" height="600" fill="url(#grad2)" />
+        <rect width="800" height="600" fill="url(#grad3)" />
+    </svg>
