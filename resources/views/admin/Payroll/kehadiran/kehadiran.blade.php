@@ -62,6 +62,7 @@
                         <!--begin::Card title-->
                         <!--begin::Card toolbar-->
                             <div class="card-toolbar">
+                                @if (auth()->user()->hasPermissionTo('tunjangan kehadiran-tambah'))
                                 <div class="gap-2 d-flex justify-content-end">
                                     <!--begin::button-->
                                     <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
@@ -69,6 +70,7 @@
                                     </button>
                                     <!--end::button-->
                                 </div>
+                                @endif
                                 @include('admin.Payroll.kehadiran.tambah_kehadiran')
                             </div>
                             <!--end::Card toolbar-->
@@ -114,14 +116,18 @@
                                             <!--begin::Menu-->
                                             <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
                                                 <!--begin::Menu item-->
+                                                @if (auth()->user()->hasPermissionTo('tunjangan kehadiran-edit'))
                                                 <div class="px-3 menu-item">
                                                     <a class="px-3 menu-link" data-bs-toggle="modal" data-bs-target="#kt_modal_new_target{{ $item->id }}">Edit</a>
                                                 </div>
+                                                @endif
                                                 <!--end::Menu item-->
                                                 <!--begin::Menu item-->
+                                                @if (auth()->user()->hasPermissionTo('tunjangan kehadiran-hapus'))
                                                 <div class="px-3 menu-item">
                                                     <a href="{{ route('payroll-kehadiran.hapus', $item->id) }}" class="px-3 menu-link delete-button">Hapus</a>
                                                 </div>
+                                                @endif
                                                 <!--end::Menu item-->
                                             </div>
                                             @include('admin.Payroll.kehadiran.edit_kehadiran')

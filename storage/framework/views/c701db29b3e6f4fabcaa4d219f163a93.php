@@ -27,10 +27,6 @@
 		<link href="admin/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
 		<link href="admin/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
         
-
-
-
-
 		<!--end::Global Stylesheets Bundle-->
 		<script>// Frame-busting to prevent site from being loaded within a frame without permission (click-jacking) if (window.top != window.self) { window.top.location.replace(window.self.location.href); }</script>
 
@@ -150,11 +146,14 @@
 									<!--end::Menu-->
 								</div>
 								<!--end::Theme mode-->
+                                <?php
+                                    $user = Auth::user();
+                                ?>
 								<!--begin::User menu-->
 								<div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
 									<!--begin::Menu wrapper-->
 									<div class="cursor-pointer symbol symbol-35px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-										<img src="" class="rounded-3" alt="user" />
+										<img src="<?php echo e(asset('admin/assets/media/' . $user->pustakawan->foto)); ?>" class="rounded-3" alt="user" />
 									</div>
 									<!--begin::User account menu-->
 									<div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold fs-6 w-275px" data-kt-menu="true">
@@ -163,13 +162,14 @@
 											<div class="px-3 menu-content d-flex align-items-center">
 												<!--begin::Avatar-->
 												<div class="symbol symbol-50px me-5">
-													<img alt="Logo" src="" />
+													<img src="<?php echo e(asset('/admin/assets/media/' . ($user->pustakawan->foto ))); ?>" class="w-100" />
 												</div>
 												<!--end::Avatar-->
 												<!--begin::Username-->
 												<div class="d-flex flex-column">
 													<div class="fw-bold d-flex align-items-center fs-5">
-													<span class="px-2 py-1 badge badge-light-success fw-bold fs-8 ms-2">AKtif</span></div>
+                                                        <span class="px-2 py-1 badge badge-light-success fw-bold fs-8 ms-2">AKtif</span>
+                                                    </div>
 													<a href="#" class="fw-semibold text-muted text-hover-primary fs-7"></a>
 												</div>
 												<!--end::Username-->
@@ -266,8 +266,17 @@
 											</div>
 											<!--end:Menu content-->
 										</div>
+                                        <?php
+											$absenPermission = [
+												'absen ruang-lihat'
+											];
 
+											$absenActive = request()->is('admin/master-*');
+										?>
+
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($absenPermission)): ?>
 										<!--begin:Menu item-->
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('absen ruang-lihat')): ?>
 										<div class="menu-item">
 											<!--begin:Menu link-->
 											<a class="menu-link <?php echo e(request()->is('admin/absen-ruang') ? 'active' : ''); ?>" href="admin/absen-ruang">
@@ -281,12 +290,22 @@
 											</a>
 											<!--end:Menu link-->
 										</div>
+                                        <?php endif; ?>
 										<!--end:Menu item-->
+                                        <?php endif; ?>
 
 										<?php
+                                            $strukturalPermission = [
+                                                'struktural geofencing-lihat',
+                                                'struktural izin-lihat',
+                                                'struktural barokah-lihat',
+                                                'struktural rekap-lihat',
+                                            ];
+
 											$strukturalActive = request()->is('admin/struktural-*');
 										?>
 
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($strukturalPermission)): ?>
                                         <div data-kt-menu-trigger="click" class="menu-item menu-accordion <?php echo e($strukturalActive ? 'here show' : ''); ?>">
                                             <span class="menu-link">
                                                 <span class="menu-icon">
@@ -296,6 +315,7 @@
                                                 <span class="menu-arrow"></span>
                                             </span>
                                             <div class="menu-sub menu-sub-accordion">
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('struktural geofencing-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/struktural-geofencing') ? 'active' : ''); ?>" href="admin/struktural-geofencing">
 														<span class="menu-bullet">
@@ -304,6 +324,8 @@
 														<span class="menu-title">Geofencing</span>
 													</a>
                                                 </div>
+                                                <?php endif; ?>
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('struktural izin-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/struktural-izin') ? 'active' : ''); ?>" href="admin/struktural-izin">
 														<span class="menu-bullet">
@@ -312,6 +334,8 @@
 														<span class="menu-title">Izin</span>
 													</a>
                                                 </div>
+                                                <?php endif; ?>
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('struktural barokah-lihat')): ?>
 												<div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/struktural-barokah') ? 'active' : ''); ?>" href="admin/struktural-barokah">
 														<span class="menu-bullet">
@@ -320,6 +344,8 @@
 														<span class="menu-title">Barokah</span>
 													</a>
                                                 </div>
+                                                <?php endif; ?>
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('struktural rekap-lihat')): ?>
 												<div class="menu-item">
 													<!--begin:Menu link-->
 													<a class="menu-link <?php echo e(request()->is('admin/struktural-rekap') ? 'active' : ''); ?>" href="admin/struktural-rekap">
@@ -330,13 +356,22 @@
 													</a>
 													<!--end:Menu link-->
 												</div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
+                                        <?php endif; ?>
 
                                         <?php
+                                            $khidmahPermission = [
+                                                'khidmah izin-lihat',
+                                                'khidmah barokah-lihat',
+                                                'khidmah rekap-lihat',
+                                            ];
+
 											$khidmahActive = request()->is('admin/khidmah-*');
 										?>
 
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($khidmahPermission)): ?>
                                         <div data-kt-menu-trigger="click" class="menu-item menu-accordion <?php echo e($khidmahActive ? 'here show' : ''); ?>">
                                             <span class="menu-link">
                                                 <span class="menu-icon">
@@ -346,6 +381,7 @@
                                                 <span class="menu-arrow"></span>
                                             </span>
                                             <div class="menu-sub menu-sub-accordion">
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('khidmah izin-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/khidmah-izin') ? 'active' : ''); ?>" href="admin/khidmah-izin">
                                                         <span class="menu-bullet">
@@ -354,6 +390,8 @@
                                                         <span class="menu-title">Izin Khidmah</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('khidmah barokah-lihat')): ?>
 												<div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/khidmah-barokah') ? 'active' : ''); ?>" href="<?php echo e(route('khidmah.barokah.index')); ?>">
 														<span class="menu-bullet">
@@ -362,6 +400,8 @@
 														<span class="menu-title">Barokah</span>
 													</a>
                                                 </div>
+                                                <?php endif; ?>
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('khidmah rekap-lihat')): ?>
 												<div class="menu-item">
 													<!--begin:Menu link-->
                                                     <a class="menu-link <?php echo e(request()->is('admin/khidmah-rekap') ? 'active' : ''); ?>" href="admin/khidmah-rekap">
@@ -372,13 +412,22 @@
 													</a>
 													<!--end:Menu link-->
 												</div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
+                                        <?php endif; ?>
 
                                         <?php
+                                            $viarPermission = [
+                                                'viar izin-lihat',
+                                                'viar barokah-lihat',
+                                                'viar rekap-lihat'
+                                            ];
+
 											$viarActive = request()->is('admin/viar-*');
 										?>
 
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($viarPermission)): ?>
                                         <div data-kt-menu-trigger="click" class="menu-item menu-accordion <?php echo e($viarActive ? 'here show' : ''); ?>">
                                             <span class="menu-link">
                                                 <span class="menu-icon">
@@ -388,6 +437,7 @@
                                                 <span class="menu-arrow"></span>
                                             </span>
                                             <div class="menu-sub menu-sub-accordion">
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('viar izin-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->routeIs('viar.izin.index') ? 'active' : ''); ?>" href="<?php echo e(route('viar.izin.index')); ?>">
                                                         <span class="menu-bullet">
@@ -396,6 +446,8 @@
                                                         <span class="menu-title">Izin Viar</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('viar barokah-lihat')): ?>
 												<div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->routeIs('viar.barokah.index') ? 'active' : ''); ?>" href="<?php echo e(route('viar.barokah.index')); ?>">
 														<span class="menu-bullet">
@@ -404,7 +456,8 @@
 														<span class="menu-title">Barokah</span>
 													</a>
                                                 </div>
-
+                                                <?php endif; ?>
+                                                <?php if(auth()->user()->hasPermissionTo('viar rekap-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->routeIs('viar.rekap.absen') ? 'active' : ''); ?>" href="<?php echo e(route('viar.rekap.absen')); ?>">
 														<span class="menu-bullet">
@@ -413,12 +466,10 @@
 														<span class="menu-title">Rekap</span>
 													</a>
                                                 </div>
-
-
+                                                <?php endif; ?>
                                             </div>
                                         </div>
-
-
+                                        <?php endif; ?>
 
 										<div class="pt-5 menu-item">
 											<!--begin:Menu content-->
@@ -428,23 +479,21 @@
 											<!--end:Menu content-->
 										</div>
 
-
 										<?php
-											$masterPermission = [
-												'master pustakawan-lihat',
-												'master jadwal-lihat',
-												'master libur-lihat',
-												'master ruang-lihat',
-												'master jabatan-lihat',
-												'master pendPagi-lihat'
-											];
+                                            $masterPermission = [
+                                                'master pustakawan-lihat',
+                                                'master jadwal-lihat',
+                                                'master libur-lihat',
+                                                'master ruang-lihat',
+                                                'master jabatan-lihat'
+                                            ];
 
 											$masterActive = request()->is('admin/master-*');
 										?>
 
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($masterPermission)): ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($masterPermission)): ?>
 										<!--begin:Menu item-->
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master pustakawan-lihat')): ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master pustakawan-lihat')): ?>
 										<div class="menu-item">
 											<!--begin:Menu link-->
 											<a class="menu-link <?php echo e(request()->is('admin/master-pustakawan') ? 'active' : ''); ?>" href="admin/master-pustakawan">
@@ -458,9 +507,10 @@
 											</a>
 											<!--end:Menu link-->
 										</div>
-										<?php endif; ?>
+                                        <?php endif; ?>
 										<!--end:Menu item-->
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master jadwal-lihat')): ?>
+										<!--begin:Menu item-->
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master jadwal-lihat')): ?>
 										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
                                             <a class="menu-link <?php echo e(request()->is('admin/master-jadwal') ? 'active' : ''); ?>" href="admin/master-jadwal">
                                                 <span class="menu-icon">
@@ -469,10 +519,10 @@
 												<span class="menu-title">Jadwal</span>
 											</a>
 										</div>
-										<?php endif; ?>
+                                        <?php endif; ?>
 										<!--end:Menu item-->
 										<!--begin:Menu item-->
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master libur-lihat')): ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master libur-lihat')): ?>
 										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
                                             <a class="menu-link <?php echo e(request()->is('admin/master-libur') ? 'active' : ''); ?>" href="admin/master-libur">
                                                 <span class="menu-icon">
@@ -481,10 +531,10 @@
 												<span class="menu-title">Libur</span>
 											</a>
 										</div>
-										<?php endif; ?>
+                                        <?php endif; ?>
 										<!--end:Menu item-->
 										<!--begin:Menu item-->
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master ruang-lihat')): ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master ruang-lihat')): ?>
 										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
                                             <a class="menu-link <?php echo e(request()->is('admin/master-ruang') ? 'active' : ''); ?>" href="admin/master-ruang">
                                                 <span class="menu-icon">
@@ -493,10 +543,10 @@
 												<span class="menu-title">Ruang</span>
 											</a>
 										</div>
-										<?php endif; ?>
+                                        <?php endif; ?>
 										<!--end:Menu item-->
 										<!--begin:Menu item-->
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master jabatan-lihat')): ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master jabatan-lihat')): ?>
 										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
                                             <a class="menu-link <?php echo e(request()->is('admin/master-jabatan') ? 'active' : ''); ?>" href="admin/master-jabatan">
                                                 <span class="menu-icon">
@@ -505,21 +555,9 @@
 												<span class="menu-title">Jabatan</span>
 											</a>
 										</div>
-										<?php endif; ?>
+                                        <?php endif; ?>
 										<!--end:Menu item-->
-										<!--begin:Menu item-->
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('master pendPagi-lihat')): ?>
-										<div data-kt-menu-trigger="click" class="menu-item menu-accordion">
-                                            <a class="menu-link <?php echo e(request()->is('admin/master-pendPagi') ? 'active' : ''); ?>" href="admin/master-pendPagi">
-                                                <span class="menu-icon">
-													<i class="ki-outline ki-user-square fs-2"></i>
-												</span>
-												<span class="menu-title">Pendidikan Pagi</span>
-											</a>
-										</div>
-										<?php endif; ?>
-										<!--end:Menu item-->
-										<?php endif; ?>
+                                        <?php endif; ?>
 
 
 										<div class="pt-5 menu-item">
@@ -531,17 +569,22 @@
 										</div>
 
 										<?php
-											$payrollPermission = [
-												'payroll tunjangan-lihat',
-											];
+                                            $tunjanganPermission = [
+                                                'tunjangan kehadiran-lihat',
+                                                'tunjangan jabatan-lihat',
+                                                'tunjangan pengabdian-lihat',
+                                                'tunjangan tunkel-lihat',
+                                                'tunjangan kehormatan-lihat',
+                                                'tunjangan anak-lihat',
+                                                'tunjangan rank-lihat',
+                                            ];
 
-											$payrollActive = request()->is('admin/payroll-*');
+											$tunjanganActive = request()->is('admin/payroll-*');
 										?>
 
-										<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($payrollPermission)): ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($tunjanganPermission)): ?>
 										<!--begin:Menu item-->
-										<div data-kt-menu-trigger="click" class="menu-item menu-accordion <?php echo e($payrollActive ? 'here show' : ''); ?>">
-                                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('payroll tunjangan-lihat')): ?>
+										<div data-kt-menu-trigger="click" class="menu-item menu-accordion <?php echo e($tunjanganActive ? 'here show' : ''); ?>">
 											<span class="menu-link">
                                                 <span class="menu-icon">
                                                     <i class="ki-outline ki-financial-schedule fs-2"></i>
@@ -552,6 +595,7 @@
 											<!--begin:Menu sub-->
                                             <div class="menu-sub menu-sub-accordion">
 												<!--begin:Menu item-->
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('tunjangan kehadiran-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/payroll-kehadiran') ? 'active' : ''); ?>" href="admin/payroll-kehadiran">
                                                         <span class="menu-bullet">
@@ -560,8 +604,10 @@
                                                         <span class="menu-title">Kehadiran</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
 												<!--end:Menu item-->
 												<!--begin:Menu item-->
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('tunjangan jabatan-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/payroll-jabatan') ? 'active' : ''); ?>" href="admin/payroll-jabatan">
                                                         <span class="menu-bullet">
@@ -570,8 +616,10 @@
                                                         <span class="menu-title">Jabatan</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
 												<!--end:Menu item-->
 												<!--begin:Menu item-->
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('tunjangan pengabdian-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/payroll-pengabdian') ? 'active' : ''); ?>" href="admin/payroll-pengabdian">
                                                         <span class="menu-bullet">
@@ -580,8 +628,10 @@
                                                         <span class="menu-title">Pengabdian</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
 												<!--end:Menu item-->
 												<!--begin:Menu item-->
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('tunjangan tunkel-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/payroll-tunkel') ? 'active' : ''); ?>" href="admin/payroll-tunkel">
                                                         <span class="menu-bullet">
@@ -590,8 +640,10 @@
                                                         <span class="menu-title">Tunkel</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
 												<!--end:Menu item-->
 												<!--begin:Menu item-->
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('tunjangan kehormatan-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/payroll-kehormatan') ? 'active' : ''); ?>" href="admin/payroll-kehormatan">
                                                         <span class="menu-bullet">
@@ -600,8 +652,10 @@
                                                         <span class="menu-title">Kehormatan</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
 												<!--end:Menu item-->
 												<!--begin:Menu item-->
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('tunjangan anak-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/payroll-anak') ? 'active' : ''); ?>" href="admin/payroll-anak">
                                                         <span class="menu-bullet">
@@ -610,8 +664,10 @@
                                                         <span class="menu-title">Anak</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
 												<!--end:Menu item-->
 												<!--begin:Menu item-->
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('tunjangan rank-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/payroll-rankDosen') ? 'active' : ''); ?>" href="admin/payroll-rankDosen">
                                                         <span class="menu-bullet">
@@ -620,13 +676,13 @@
                                                         <span class="menu-title">Rank Dosen</span>
                                                     </a>
                                                 </div>
+                                                <?php endif; ?>
 												<!--end:Menu item-->
                                             </div>
 											<!--end:Menu sub-->
-											<?php endif; ?>
                                         </div>
-										<?php endif; ?>
 										<!--end:Menu item-->
+                                        <?php endif; ?>
 
 										<div class="pt-5 menu-item">
 											<!--begin:Menu content-->
@@ -638,11 +694,13 @@
 
 										<?php
                                             $penggunaPermission = [
-												'akses pengguna-lihat',
+                                                'hak pengguna-lihat',
+                                                'hak akses-lihat',
                                             ];
 
                                             $penggunaActive = request()->is('admin/pengguna*');
                                         ?>
+
                                         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any($penggunaPermission)): ?>
                                         <div data-kt-menu-trigger="click" class="menu-item menu-accordion <?php echo e($penggunaActive ? 'here show' : ''); ?>">
                                             <span class="menu-link">
@@ -653,6 +711,7 @@
                                                 <span class="menu-arrow"></span>
                                             </span>
                                             <div class="menu-sub menu-sub-accordion">
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('hak pengguna-lihat')): ?>
                                                 <div class="menu-item">
                                                     <a class="menu-link <?php echo e(request()->is('admin/pengguna') ? 'active' : ''); ?>" href="admin/pengguna">
 														<span class="menu-bullet">
@@ -661,7 +720,8 @@
 														<span class="menu-title">Data Pengguna</span>
 													</a>
                                                 </div>
-												<?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('akses pengguna-lihat')): ?>
+                                                <?php endif; ?>
+                                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('hak akses-lihat')): ?>
 												<div class="menu-item">
 													<!--begin:Menu link-->
 													<a class="menu-link <?php echo e(request()->is('admin/pengguna-akses') ? 'active' : ''); ?>" href="admin/pengguna-akses">
@@ -672,12 +732,10 @@
 													</a>
 													<!--end:Menu link-->
 												</div>
-												<?php endif; ?>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                         <?php endif; ?>
-
-
 										<!--end:Menu item-->
 									</div>
 									<!--end::Menu-->

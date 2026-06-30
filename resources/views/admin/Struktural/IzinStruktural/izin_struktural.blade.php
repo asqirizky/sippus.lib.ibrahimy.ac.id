@@ -83,11 +83,13 @@
                                 <button type="submit" class="btn btn-danger">
                                     <i class="ki-outline ki-filter fs-5"></i> Filter
                                 </button>
+                                @if (auth()->user()->hasPermissionTo('struktural izin-tambah'))
                                 <div class="flex-wrap gap-3 d-flex justify-content-between align-items-end" data-kt-user-table-toolbar="base">
                                     <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
                                         <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Izin
                                     </button>
                                 </div>
+                                @endif
                             </form>
                             @include('admin.Struktural.IzinStruktural.izin_tambah')
                         </div>
@@ -130,9 +132,11 @@
                                         <!--begin::Menu-->
                                         <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
                                             <!--begin::Menu item-->
+                                            @if (auth()->user()->hasPermissionTo('struktural izin-hapus'))
                                             <div class="px-3 menu-item">
                                                 <a href="{{ route('struktural-izin.hapus', $item->id) }}" class="px-3 menu-link delete-button" data-kt-users-table-filter="delete_row" data-confirm-delete="true">Hapus</a>
                                             </div>
+                                            @endif
                                             <!--end::Menu item-->
                                         </div>
                                         <!--end::Menu-->

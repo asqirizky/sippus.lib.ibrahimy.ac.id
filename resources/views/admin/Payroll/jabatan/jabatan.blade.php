@@ -64,9 +64,11 @@
                             <div class="card-toolbar">
                                 <div class="gap-2 d-flex justify-content-end">
                                     <!--begin::button-->
+                                    @if (auth()->user()->hasPermissionTo('tunjangan jabatan-tambah'))
                                     <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
                                         <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Tunjangan
                                     </button>
+                                    @endif
                                     <!--end::button-->
                                 </div>
                                 @include('admin.Payroll.jabatan.jabatan_tambah')
@@ -91,7 +93,7 @@
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 fw-semibold">
-                                @foreach ($payJabatan as $item )                                    
+                                @foreach ($payJabatan as $item )
                                 <tr>
                                     <td></td>
                                     <td class="text-start">
@@ -114,14 +116,18 @@
                                         <!--begin::Menu-->
                                         <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
                                             <!--begin::Menu item-->
+                                            @if (auth()->user()->hasPermissionTo('tunjangan jabatan-edit'))
                                             <div class="px-3 menu-item">
                                                 <a class="px-3 menu-link" data-bs-toggle="modal" data-bs-target="#kt_modal_new_target{{ $item->id }}">Edit</a>
                                             </div>
+                                            @endif
                                             <!--end::Menu item-->
                                             <!--begin::Menu item-->
+                                            @if (auth()->user()->hasPermissionTo('tunjangan jabatan-hapus'))
                                             <div class="px-3 menu-item">
                                                 <a href="{{ route('payroll-jabatan.hapus', $item->id) }}" class="px-3 menu-link delete-button">Hapus</a>
                                             </div>
+                                            @endif
                                             <!--end::Menu item-->
                                         </div>
                                         <!--end::Menu-->

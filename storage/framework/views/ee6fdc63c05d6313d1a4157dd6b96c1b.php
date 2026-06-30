@@ -60,15 +60,15 @@
                         </div>
                         <!--begin::Card title-->
                         <!--begin::Card toolbar-->
+                        <?php if(auth()->user()->hasPermissionTo('master pustakawan-tambah')): ?>
                         <div class="card-toolbar">
-                            <?php if(auth()->user()->hasPermissionTo('master pustakawan-tambah')): ?>
                             <div class="flex-wrap gap-3 d-flex justify-content-between align-items-end" data-kt-user-table-toolbar="base">
                                 <a href="<?php echo e(route('master-tambah.pustakawan')); ?>" type="button" class="btn btn-primary">
                                     <i class="ki-duotone ki-plus fs-2"></i> Tambah Pustakawan
                                 </a>
                             </div>
-                            <?php endif; ?>
                         </div>
+                        <?php endif; ?>
                         <!--end::Card toolbar-->
                     </div>
                     <!--end::Card header-->
@@ -170,17 +170,19 @@
                                         <i class="ki-outline ki-down fs-5 ms-1"></i></a>
                                         <!--begin::Menu-->
                                         <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
-                                            <?php if(auth()->user()->hasPermissionTo('master pustakawan-detail')): ?>
                                             <!--begin::Menu item-->
+                                            <?php if(auth()->user()->hasPermissionTo('master pustakawan-detail')): ?>
                                             <div class="px-3 menu-item">
                                                 <a class="px-3 menu-link" href="<?php echo e(url('admin/master-detail_pustakawan=' . $item->id)); ?>">Detail</a>
                                             </div>
-                                            <!--end::Menu item-->
                                             <?php endif; ?>
+                                            <!--end::Menu item-->
                                             <!--begin::Menu item-->
+                                            <?php if(auth()->user()->hasPermissionTo('master pustakawan-hapus')): ?>
                                             <div class="px-3 menu-item">
                                                 <a href="<?php echo e(route('master-pustakawan.hapus', $item->id)); ?>" class="px-3 menu-link delete-button" data-kt-users-table-filter="delete_row" data-confirm-delete="true">Hapus</a>
                                             </div>
+                                            <?php endif; ?>
                                             <!--end::Menu item-->
                                         </div>
                                         <!--end::Menu-->

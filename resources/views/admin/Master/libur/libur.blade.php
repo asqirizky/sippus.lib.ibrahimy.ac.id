@@ -84,14 +84,13 @@
                                     <i class="ki-outline ki-filter fs-5"></i> Filter
                                 </button>
                                 @if (auth()->user()->hasPermissionTo('master libur-tambah'))
-                                    <div class="flex-wrap gap-3 d-flex justify-content-between align-items-end" data-kt-user-table-toolbar="base">
-                                        <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
-                                            <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Hari Libur
-                                        </button>
-                                    </div>
+                                <div class="flex-wrap gap-3 d-flex justify-content-between align-items-end" data-kt-user-table-toolbar="base">
+                                    <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
+                                        <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Hari Libur
+                                    </button>
+                                </div>
                                 @endif
                             </form>
-
                             @include('admin.Master.libur.libur_tambah')
                         </div>
                         <!--end::Card toolbar-->

@@ -61,20 +61,20 @@
                         </div>
                         <!--begin::Card title-->
                         <!--begin::Card toolbar-->
-                            <div class="card-toolbar">
-                                <div class="gap-2 d-flex justify-content-end">
-                                    <!--begin::button-->
-                                    @if (auth()->user()->hasPermissionTo('master ruang-tambah'))
-                                    <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
-                                        <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Ruang
-                                    </button>
-                                    @endif
-                                    <!--end::button-->
-                                    @include('admin.Master.ruang.tambah_ruang')
-                                </div>
+                        <div class="card-toolbar">
+                            <div class="gap-2 d-flex justify-content-end">
+                                <!--begin::button-->
+                                @if (auth()->user()->hasPermissionTo('master ruang-tambah'))
+                                <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
+                                    <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Ruang
+                                </button>
+                                @endif
+                                <!--end::button-->
+                                @include('admin.Master.ruang.tambah_ruang')
                             </div>
-                            <!--end::Card toolbar-->
                         </div>
+                        <!--end::Card toolbar-->
+                    </div>
                     <!--end::Card header-->
                     <!--begin::Card body-->
                     <div class="py-4 card-body">
@@ -103,7 +103,7 @@
                                     </td>
                                     <td class="text-center"></td>
                                     <td class="text-center">
-                                        
+
                                     <td></td>
                                     <td class="text-center pe-4">
                                         <a href="#" class="btn btn-sm btn-light-primary btn-active-primary btn-flex btn-center" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Opsi

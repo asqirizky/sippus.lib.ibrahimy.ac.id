@@ -81,9 +81,11 @@
                     </div>
                 <div class="card card-flush">
                     <div class="gap-2 py-5 card-header align-items-center gap-md-5 bg-success" style="background-image: url('/admin/assets/media/pattern.png'); background-size: 350px; background-position: right; background-repeat: no-repeat;">
+                        <?php if(auth()->user()->hasPermissionTo('khidmah rekap-mandiri')): ?>
                         <div class="card-title">
                             <a href="<?php echo e(route('khidmah-mandiri')); ?>" class="btn btn-warning me-4">Mandiri</a>
                         </div>
+                        <?php endif; ?>
                         <div class="gap-2 card-toolbar d-flex justify-content-end align-items-center">
                             <form action="" method="GET" class="gap-2 d-flex align-items-center">
                                 <input class="form-control mw-150px" type="date" name="tanggal" value="<?php echo e($tanggal ?? date('Y-m-d')); ?>">

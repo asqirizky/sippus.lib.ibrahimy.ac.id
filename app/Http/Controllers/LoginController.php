@@ -21,7 +21,7 @@ class LoginController extends Controller
     // Menampilkan halaman login
     public function showLoginForm()
     {
-         $user = User::latest()->get();
+        $user = User::latest()->get();
 
         return view('auth.login', compact('user')); // Pastikan ada file resources/views/auth/login.blade.php
     }

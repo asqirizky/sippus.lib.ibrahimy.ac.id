@@ -61,18 +61,20 @@
                         </div>
                         <!--begin::Card title-->
                         <!--begin::Card toolbar-->
-                            <div class="card-toolbar">
-                                <div class="gap-2 d-flex justify-content-end">
-                                    <!--begin::button-->
-                                    <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
-                                        <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Tunjangan
-                                    </button>
-                                    @include('admin.Payroll.pengabdian.tambah_pengabdian')
-                                    <!--end::button-->
-                                </div>
+                        <div class="card-toolbar">
+                            <div class="gap-2 d-flex justify-content-end">
+                                <!--begin::button-->
+                                @if (auth()->user()->hasPermissionTo('tunjangan pengabdian-tambah'))
+                                <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
+                                    <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Tunjangan
+                                </button>
+                                @endif
+                                @include('admin.Payroll.pengabdian.tambah_pengabdian')
+                                <!--end::button-->
                             </div>
-                            <!--end::Card toolbar-->
                         </div>
+                        <!--end::Card toolbar-->
+                    </div>
                     <!--end::Card header-->
                     <!--begin::Card body-->
                     <div class="py-4 card-body">
@@ -114,14 +116,18 @@
                                             <!--begin::Menu-->
                                             <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
                                                 <!--begin::Menu item-->
+                                                @if (auth()->user()->hasPermissionTo('tunjangan pengabdian-edit'))
                                                 <div class="px-3 menu-item">
                                                     <a class="px-3 menu-link" data-bs-toggle="modal" data-bs-target="#kt_modal_new_target{{ $item->id }}">Edit</a>
                                                 </div>
+                                                @endif
                                                 <!--end::Menu item-->
                                                 <!--begin::Menu item-->
+                                                @if (auth()->user()hasPermissionTo('tunjangan pengabdian-hapus'))
                                                 <div class="px-3 menu-item">
                                                     <a href="{{ route('payroll-pengabdian.hapus', $item->id) }}" class="px-3 menu-link delete-button">Hapus</a>
                                                 </div>
+                                                @endif
                                                 <!--end::Menu item-->
                                             </div>
                                             @include('admin.Payroll.pengabdian.edit_pengabdian')

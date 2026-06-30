@@ -12,7 +12,7 @@ class PermissionController extends Controller
     //
     public function index(Permission $permission)
     {
-        $permissions = Permission::with('users')->latest()->get();
+        $permissions = Permission::with('users.pustakawan')->get();
         return view('admin.user.permission.index', compact('permissions', 'permission'));
     }
 

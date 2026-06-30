@@ -62,7 +62,7 @@
                                 <!--begin::Toolbar-->
                                 <div class="d-flex justify-content-end" data-kt-user-table-toolbar="base">
                                     <!--begin::Add user-->
-                                    @if (auth()->user()->hasPermissionTo('pengguna-tambah'))
+                                    @if (auth()->user()->hasPermissionTo('hak pengguna-tambah'))
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                             data-bs-target="#kt_modal_update_details">
                                             <i class="ki-duotone ki-plus fs-2"></i>Tambah Pengguna
@@ -84,11 +84,11 @@
                                     <tr class="text-start text-white fw-bold fs-7 text-uppercase gs-0">
                                         <th class="rounded-start"></th>
                                         <th class="min-w-125px">Pengguna</th>
-                                        <th class="min-w-125px">IDStaff</th>
-                                        <th class="min-w-125px">Username</th>
-                                        <th class="min-w-125px">Ruang</th>
-                                        <th class="min-w-125px">Bergabung</th>
-                                        <th class="text-end min-w-100px rounded-end pe-4">Opsi</th>
+                                        <th class="text-center">Username</th>
+                                        <th></th>
+                                        <th class="text-center">Ruang</th>
+                                        <th class="text-center">Tanggal Dibuat</th>
+                                        <th class="text-center min-w-100px rounded-end pe-4">Opsi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-gray-600 fw-semibold">
@@ -99,26 +99,27 @@
                                                 <!--begin:: Avatar -->
                                                 <div class="symbol symbol-circle symbol-50px overflow-hidden me-3">
                                                     <div class="symbol-label">
-                                                        <img src="{{ asset('/storage/foto/' . $item->foto) }}"
-                                                            alt="{{ $item->name }}" class="w-100" />
+                                                        <img src="{{ asset('/admin/assets/media/' . ($item->pustakawan->foto ?? 'default.png')) }}"
+                                                        alt="{{ $item->pustakawan?->nama_pustakawan }}"
+                                                        class="w-100">
                                                     </div>
                                                 </div>
                                                 <!--end::Avatar-->
                                                 <!--begin::User details-->
                                                 <div class="d-flex flex-column">
-                                                    <div class="text-gray-800 mb-1">{{ $item->name }}</div>
-                                                    <span>{{ $item->jabatan }}</span>
+                                                    <div class="text-gray-800 mb-1">{{ $item->pustakawan->nama_pustakawan }}</div>
+                                                    <span>{{ $item->pustakawan->jabatan->nama_jabatan }}</span>
                                                 </div>
                                                 <!--begin::User details-->
                                             </td>
-                                            <td>{{ $item->idstaf }}</td>
-                                            <td>
-                                                <div class="badge py-3 px-4 fs-7 badge-light fw-bold">{{ $item->username }}
+                                            <td class="text-center">
+                                                <div class="badge py-3 px-4 fs-7 badge-light-success fw-bold">{{ $item->username }}
                                                 </div>
                                             </td>
-                                            <td>{{ $item->tempat }}</td>
-                                            <td>{{ Carbon\Carbon::parse($item->created_at)->isoFormat('D MMMM Y') }}</td>
-                                            <td class="text-end">
+                                            <td></td>
+                                            <td class="text-center">{{ $item->pustakawan->ruang->ruang_pustakawans }}</td>
+                                            <td class="text-center">{{ Carbon\Carbon::parse($item->created_at)->isoFormat('D MMMM Y') }}</td>
+                                            <td class="text-center">
                                                 <a class="btn btn-sm btn-light btn-flex btn-center btn-sm"
                                                     data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">Opsi
                                                     <i class="ki-outline ki-down fs-5 ms-1"></i></a>
@@ -126,15 +127,15 @@
                                                 <div class="menu me nu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-150px py-4"
                                                     data-kt-menu="true">
                                                     <!--begin::Menu item-->
-                                                    @if (auth()->user()->hasPermissionTo('pengguna-akses pengguna'))
+                                                    @if (auth()->user()->hasPermissionTo('hak pengguna-kelola'))
                                                         <div class="menu-item px-3">
-                                                            <a href="{{ url('/admin/pengguna-akses/'.$item->id.'/akses') }}"
+                                                            <a href="{{ url('/admin/pengguna-akses-'.$item->id.'-akses') }}"
                                                                 class="menu-link px-3">Kelola Akses</a>
                                                         </div>
                                                     @endif
                                                     <!--end::Menu item-->
                                                     <!--begin::Menu item-->
-                                                    @if (auth()->user()->hasPermissionTo('pengguna-edit'))
+                                                    @if (auth()->user()->hasPermissionTo('hak pengguna-edit'))
                                                         <div class="menu-item px-3">
                                                             <a href="#" class="menu-link px-3" data-bs-toggle="modal"
                                                                 data-bs-target="#kt_modal_update_details{{ $item->id }}">Edit
@@ -143,7 +144,7 @@
                                                     @endif
                                                     <!--end::Menu item-->
                                                     <!--begin::Menu item-->
-                                                    @if (auth()->user()->hasPermissionTo('pengguna-ubah password'))
+                                                    @if (auth()->user()->hasPermissionTo('hak pengguna-ubah'))
                                                         <div class="menu-item px-3">
                                                             <a href="#" class="menu-link px-3" data-bs-toggle="modal"
                                                                 data-bs-target="#kt_modal_ubahpassword{{ $item->id }}">Ubah
@@ -152,7 +153,7 @@
                                                     @endif
                                                     <!--end::Menu item-->
                                                     <!--begin::Menu item-->
-                                                    @if (auth()->user()->hasPermissionTo('pengguna-hapus'))
+                                                    @if (auth()->user()->hasPermissionTo('hak pengguna-hapus'))
                                                         <div class="menu-item px-3">
                                                             <a href="{{ asset('/admin/pengguna(' . $item->id . ')/hapus') }}"
                                                                 class="menu-link px-3 delete-button"

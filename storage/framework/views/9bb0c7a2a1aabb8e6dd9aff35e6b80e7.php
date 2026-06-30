@@ -55,14 +55,12 @@
                         </div>
                         <!--end::Card title-->
                         <!--begin::Card toolbar-->
-                        <?php if(auth()->user()->hasPermissionTo('akses pengguna-tambah')): ?>
                         <div class="card-toolbar">
                             <!--begin::Button-->
                             <button type="button" class="btn btn-light-danger" data-bs-toggle="modal" data-bs-target="#kt_modal_add_permission">
                             <i class="ki-outline ki-plus-square fs-3"></i>Tambah Akses</button>
                             <!--end::Button-->
                         </div>
-                        <?php endif; ?>
                         <!--end::Card toolbar-->
                     </div>
                     <!--end::Card header-->
@@ -89,17 +87,15 @@
                                             <div class="badge badge-light-danger">Tidak ada pengguna yang memiliki hak akses ini.</div>
                                         <?php else: ?>
                                             <?php $__currentLoopData = $item->users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <div class="badge py-3 px-4 fs-7 badge-light-primary my-1"><?php echo e($user->name); ?></div>
+                                                <div class="badge py-3 px-4 fs-7 badge-light-primary my-1"><?php echo e($user->pustakawan->nama_pustakawan); ?></div>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         <?php endif; ?>
                                     </td>
-                                    
                                     <?php echo $__env->make('admin.user.permission.edit', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                                     <td></td>
                                     <td class="text-end pe-4"><div class="badge py-3 px-4 fs-7 badge-danger"><?php echo e(Carbon\Carbon::parse($item->created_at)->isoFormat('D MMMM Y')); ?></div></td>
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-
                             </tbody>
                         </table>
                         <!--end::Table-->

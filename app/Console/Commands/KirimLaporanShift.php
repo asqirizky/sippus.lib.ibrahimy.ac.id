@@ -208,30 +208,30 @@ class KirimLaporanShift extends Command
             // =========================
             $pesan .= "\nIzin :\n";
 
-if ($izin->count() > 0) {
+            if ($izin->count() > 0) {
 
-    $no = 1;
+                $no = 1;
 
-    foreach ($izin as $item) {
+                foreach ($izin as $item) {
 
-        $nama = optional(
-            $item->pustakawan
-        )->nama_pustakawan;
+                    $nama = optional(
+                        $item->pustakawan
+                    )->nama_pustakawan;
 
-        $keterangan = ucwords(
-            strtolower(
-                trim($item->keterangan ?? 'Izin')
-            )
-        );
+                    $keterangan = ucwords(
+                        strtolower(
+                            trim($item->keterangan ?? 'Izin')
+                        )
+                    );
 
-        $pesan .= $no++ . ". ";
-        $pesan .= "{$nama} ({$keterangan})\n";
-    }
+                    $pesan .= $no++ . ". ";
+                    $pesan .= "{$nama} ({$keterangan})\n";
+                }
 
-} else {
+            } else {
 
-    $pesan .= "_Tidak ada izin hari ini_\n";
-}
+                $pesan .= "_Tidak ada izin hari ini_\n";
+            }
 
             // =========================
             // TANPA KETERANGAN

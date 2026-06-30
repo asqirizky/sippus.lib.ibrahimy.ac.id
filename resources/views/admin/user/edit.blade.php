@@ -23,7 +23,7 @@
                 <div class="mb-13 text-center">
                     <!--begin::Title-->
                     <h1 class="mb-3">Edit Data Pengguna</h1>
-                    <div class="text-muted fw-semibold fs-5">Edit data; {{ $item->name }} </div>
+                    <div class="text-muted fw-semibold fs-5">Edit data {{ $item->pustakawan->nama_pustakawan }} </div>
                     <!--end::Title-->
                 </div>
                 <!--end::Heading-->
@@ -39,35 +39,10 @@
                     <!--begin::Image input-->
                     <div class="image-input image-input-outline image-input-placeholder" data-kt-image-input="true">
                         <!--begin::Preview existing avatar-->
-                        <div class="image-input-wrapper w-125px h-125px" style="background-image: url({{ asset('/storage/foto/' . $item->foto) }});"></div>
-                        <!--end::Preview existing avatar-->
-                        <!--begin::Label-->
-                        <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Upload Foto">
-                            <i class="ki-outline ki-pencil fs-7">
-                            </i>
-                            <!--begin::Inputs-->
-                            <input type="file" name="foto" id="foto" value="blank.png" accept=".png, .jpg, .jpeg"/>
-                            <input type="hidden" name="avatar_remove" />
-                            <!--end::Inputs-->
-                        </label>
-                        <!--end::Label-->
-                        <!--begin::Cancel-->
-                        <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Cancel Foto">
-                            <i class="ki-outline ki-cross fs-2">
-                            </i>
-                        </span>
-                        <!--end::Cancel-->
-                        <!--begin::Remove-->
-                        <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="remove" data-bs-toggle="tooltip" title="Hapus foto">
-                            <i class="ki-outline ki-cross fs-2">
-                            </i>
-                        </span>
-                        <!--end::Remove-->
+                        <div class="image-input-wrapper w-125px h-125px" style="background-image: url({{ asset('/admin/assets/media/' . ($item->pustakawan->foto ?? 'default.png')) }});"></div>
+                        <!--end::Preview existi-->
                     </div>
                     <!--end::Image input-->
-                    <!--begin::Hint-->
-                    <div class="form-text">File memiliki format: png, jpg, jpeg.</div>
-                    <!--end::Hint-->
                 </div>
                 <!--end::Input group-->
                 <!--begin::Input group-->
@@ -76,17 +51,7 @@
                     <label class="required fw-semibold fs-6 mb-2">Nama Pengguna</label>
                     <!--end::Label-->
                     <!--begin::Input-->
-                    <input type="text" name="name" id="name" class="form-control mb-3 mb-lg-0" placeholder="Nama Pengguna" value="{{ $item->name }}" required autocomplete="name" />
-                    <!--end::Input-->
-                </div>
-                <!--end::Input group-->
-                <!--begin::Input group-->
-                <div class="fv-row mb-7">
-                    <!--begin::Label-->
-                    <label class="required fw-semibold fs-6 mb-2">ID-Staff</label>
-                    <!--end::Label-->
-                    <!--begin::Input-->
-                    <input type="text" name="idstaf" id="idstaf" class="form-control mb-3 mb-lg-0" placeholder="ID Staff" value="{{ $item->idstaf }}" required autocomplete="idstaf" />
+                    <input type="text" class="form-control mb-3 mb-lg-0" value="{{ $item->pustakawan->nama_pustakawan }}" readonly/>
                     <!--end::Input-->
                 </div>
                 <!--end::Input group-->
@@ -96,23 +61,10 @@
                     <label class="required fw-semibold fs-6 mb-2">Jabatan</label>
                     <!--end::Label-->
                     <!--begin::Input-->
-                    <input type="text" name="jabatan" id="jabatan" class="form-control mb-3 mb-lg-0" placeholder="Jabatan Instansi" value="{{ $item->jabatan }}" required autocomplete="jabatan" />
+                    <input type="text" class="form-control mb-3 mb-lg-0" value="{{ $item->pustakawan->jabatan->nama_jabatan }}" readonly/>
                     <!--end::Input-->
                 </div>
                 <!--end::Input group-->
-                <!--begin::Input group-->
-                <div class="fv-row mb-7">
-                    <!--begin::Label-->
-                    <label class="required fw-semibold fs-6 mb-2">Tempat Khidmah</label>
-                    <!--end::Label-->
-                    <!--begin::Input-->
-                    <select class="form-select" name="tempat" data-control="select2" data-hide-search="true" data-placeholder="Pilih Tempat Khidmah">
-                        <option value="">Lorem ipsum dolor </option>
-                    </select>
-                    <!--end::Input-->
-                </div>
-                <!--end::Input group-->
-                <div class="separator separator-solid mb-5"></div>
                 <!--begin::Input group-->
                 <div class="fv-row mb-12">
                     <!--begin::Label-->

@@ -58,14 +58,16 @@
                     <!--begin::Card header-->
                     <div class="gap-2 py-5 card-header align-items-center gap-md-5 bg-success" style="background-image: url('/admin/assets/media/pattern.png'); background-size: 650px; background-position: right; background-repeat: no-repeat;">
                         <!--begin::Card title-->
+                        @if (auth()->user()->hasPermissionTo('struktural barokah-generate'))
                         <div class="card-title">
                             <!--end::Button filter-->
-                                <a href="{{ route('struktural-generate', [
+                            <a href="{{ route('struktural-generate', [
                                     'bulan' => request('bulan', now()->month),
                                     'tahun' => request('tahun', now()->year)
-                                ]) }}" class="btn btn-warning me-4">Generate</a>
+                                    ]) }}" class="btn btn-warning me-4">Generate</a>
                             <!--end::Button filter-->
                         </div>
+                        @endif
                         <!--end::Card title-->
                         <!--begin::Card title-->
                         <div class="gap-2 card-toolbar d-flex justify-content-end align-items-center">

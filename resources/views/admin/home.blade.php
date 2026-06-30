@@ -86,7 +86,7 @@
 											<span class="text-gray-500 fw-semibold">
 												@if ($item->persentase < 50 )
 													<div class="px-4 py-3 badge fs-6 badge-light-danger">{{ $item->persentase }}%</div>
-												@elseif ($item->persentase > 80 )
+												@elseif ($item->persentase > 50 )
 													<div class="px-4 py-3 badge fs-6 badge-light-success">{{ $item->persentase }}%</div>
 												@endif
 											</span>

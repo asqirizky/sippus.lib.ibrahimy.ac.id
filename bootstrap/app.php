@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Middleware\PermissionMiddleware;
-use Illuminate\Auth\Middleware\Authenticate;
+// use App\Http\Middleware\PermissionMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,10 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \RealRashid\SweetAlert\ToSweetAlert::class,
         ]);
 
-        $middleware->alias([
-            'auth' => Authenticate::class,
-            'permission' => PermissionMiddleware::class,
-        ]);
+        // $middleware->alias([
+        //     'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+        //     'permission' => PermissionMiddleware::class,
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

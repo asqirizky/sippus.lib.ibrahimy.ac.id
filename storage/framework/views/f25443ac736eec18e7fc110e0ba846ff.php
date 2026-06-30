@@ -84,11 +84,13 @@
                                 <button type="submit" class="btn btn-danger">
                                     <i class="ki-outline ki-filter fs-5"></i> Filter
                                 </button>
+                                <?php if(auth()->user()->hasPermissionTo('viar izin-tambah')): ?>
                                 <div class="flex-wrap gap-3 d-flex justify-content-between align-items-end" data-kt-user-table-toolbar="base">
                                     <button type="button" class="btn btn-m btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
                                         <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Izin
                                     </button>
                                 </div>
+                                <?php endif; ?>
                             </form>
                             
                             <?php echo $__env->make('admin.Viar.IzinViar.izin_tambah_viar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
@@ -131,11 +133,13 @@
                                         <i class="ki-outline ki-down fs-5 ms-1"></i></a>
                                         <!--begin::Menu-->
                                         <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
+                                        <?php if(auth()->user()->hasPermissionTo('viar izin-hapus')): ?>
                                             <!--begin::Menu item-->
                                             <div class="px-3 menu-item">
                                                 <a href="<?php echo e(route('viar.izin.destroy', $item->id)); ?>" class="px-3 menu-link delete-button" data-kt-users-table-filter="delete_row" data-confirm-delete="true">Hapus</a>
                                             </div>
                                             <!--end::Menu item-->
+                                        <?php endif; ?>
                                         </div>
                                         <!--end::Menu-->
                                     </td>

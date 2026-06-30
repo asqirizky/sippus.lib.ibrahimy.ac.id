@@ -61,16 +61,16 @@
                         </div>
                         <!--begin::Card title-->
                         <!--begin::Card toolbar-->
+                        @if (auth()->user()->hasPermissionTo('master jadwal-tambah'))
                         <div class="card-toolbar">
                             <div class="flex-wrap gap-3 d-flex justify-content-between align-items-end" data-kt-user-table-toolbar="base">
-                                @if(auth()->user()->hasPermissionTo('master jadwal-tambah'))
                                 <a type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
                                     <i class="ki-duotone ki-plus fs-2"></i> Tambah Jadwal
                                 </a>
-                                @endif
                                 @include('admin.Master.jadwal.tambah_jadwal')
                             </div>
                         </div>
+                        @endif
                         <!--end::Card toolbar-->
                     </div>
                     <!--end::Card header-->
@@ -112,20 +112,20 @@
                                             <i class="ki-outline ki-down fs-5 ms-1"></i></a>
                                             <!--begin::Menu-->
                                             <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
-                                                @if(auth()->user()->hasPermissionTo('master jadwal-edit'))
                                                 <!--begin::Menu item-->
+                                                @if (auth()->user()->hasPermissionTo('master jadwal-edit'))
                                                 <div class="px-3 menu-item">
                                                     <a class="px-3 menu-link" data-bs-toggle="modal" data-bs-target="#kt_modal_new_target{{ $item->id }}">Edit</a>
                                                 </div>
-                                                <!--end::Menu item-->
                                                 @endif
-                                                @if(auth()->user()->hasPermissionTo('master jadwal-hapus'))
+                                                <!--end::Menu item-->
                                                 <!--begin::Menu item-->
+                                                @if (auth()->user()->hasPermissionTo('master jadwal-hapus'))
                                                 <div class="px-3 menu-item">
                                                     <a href="{{ route('master-jadwal.hapus', $item->id) }}" class="px-3 menu-link delete-button">Hapus</a>
                                                 </div>
-                                                <!--end::Menu item-->
                                                 @endif
+                                                <!--end::Menu item-->
                                             </div>
                                             @include('admin.Master.jadwal.edit_jadwal')
                                             <!--end::Menu-->

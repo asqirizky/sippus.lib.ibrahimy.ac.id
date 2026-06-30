@@ -61,17 +61,19 @@
                         </div>
                         <!--begin::Card title-->
                         <!--begin::Card toolbar-->
-                            <div class="card-toolbar">
-                                <div class="gap-2 d-flex justify-content-end">
-                                    <!--begin::button-->
-                                    <a type="button" href="admin/struktural-create_geofencing" class="btn btn-m btn-primary d-flex align-items-center">
-                                        <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Koordinat
-                                    </a>
-                                    <!--end::button-->
-                                </div>
+                        @if (auth()->user()->hasPermissionTo('struktural geofencing-tambah') )
+                        <div class="card-toolbar">
+                            <div class="gap-2 d-flex justify-content-end">
+                                <!--begin::button-->
+                                <a type="button" href="admin/struktural-create_geofencing" class="btn btn-m btn-primary d-flex align-items-center">
+                                    <i class="ki-duotone ki-plus fs-4 me-2"></i> Tambah Koordinat
+                                </a>
+                                <!--end::button-->
                             </div>
-                            <!--end::Card toolbar-->
                         </div>
+                        <!--end::Card toolbar-->
+                        @endif
+                    </div>
                     <!--end::Card header-->
                     <!--begin::Card body-->
                     <div class="py-4 card-body">
@@ -107,14 +109,18 @@
                                         <!--begin::Menu-->
                                         <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
                                             <!--begin::Menu item-->
+                                            @if (auth()->user()->hasPermissionTo('struktural geofencing-edit'))
                                             <div class="px-3 menu-item">
                                                 <a href="{{ route('update-geofencing.lihat', $item->id) }}" class="px-3 menu-link">Edit</a>
                                             </div>
+                                            @endif
                                             <!--end::Menu item-->
                                             <!--begin::Menu item-->
+                                            @if (auth()->user()->hasPermissionTo('struktural geofencing-hapus'))
                                             <div class="px-3 menu-item">
                                                 <a href="{{ route('geofencing.hapus', $item->id) }}" class="px-3 menu-link delete-button">Hapus</a>
                                             </div>
+                                            @endif
                                             <!--end::Menu item-->
                                         </div>
                                         <!--end::Menu-->

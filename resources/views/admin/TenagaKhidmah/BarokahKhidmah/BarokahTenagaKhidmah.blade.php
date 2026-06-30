@@ -48,6 +48,7 @@
                         <!--begin::Card title-->
                         <div class="gap-2 card-toolbar d-flex justify-content-end align-items-center">
                             <!--begin::Card toolbar-->
+                            @if (auth()->user()->hasPermissionTo('khidmah barokah-tambah'))
                             <div class="card-title">
                                 <!--begin::Select-->
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
@@ -56,6 +57,7 @@
                                 <!--end::Select-->
                                 @include('admin.TenagaKhidmah.BarokahKhidmah.TambahBarokahKhidmah')
                             </div>
+                            @endif
                             <!--end::Card toolbar-->
                         </div>
                         <!--end::Card title-->
@@ -94,14 +96,18 @@
                                         <!--begin::Menu-->
                                         <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
                                             <!--begin::Menu item-->
+                                            @if (auth()->user()->hasPermissionTo('khidmah barokah-edit'))
                                             <div class="px-3 menu-item">
                                                 <a class="px-3 menu-link" data-bs-toggle="modal" data-bs-target="#kt_modal_new_target{{ $item->id }}">Edit</a>
                                             </div>
+                                            @endif
                                             <!--end::Menu item-->
                                             <!--begin::Menu item-->
+                                            @if (auth()->user()->hasPermissionTo('khidmah barokah-hapus'))
                                             <div class="px-3 menu-item">
                                                 <a href="{{ route('khidmah.barokah.destroy', $item->id) }}" class="px-3 menu-link delete-button" data-kt-users-table-filter="delete_row" data-confirm-delete="true">Hapus</a>
                                             </div>
+                                            @endif
                                             <!--end::Menu item-->
                                         </div>
                                         <!--end::Menu-->

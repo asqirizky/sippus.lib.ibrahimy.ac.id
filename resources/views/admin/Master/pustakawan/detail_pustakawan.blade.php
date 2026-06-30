@@ -60,6 +60,7 @@
                                 </h3>
                                 <!--end::Title-->
                                 <!--begin::Actions-->
+                                @if (auth()->user()->hasPermissionTo('master pustakawan-edit'))
                                 <div class="card-toolbar">
                                     <!--begin::Filters-->
                                     <div class="flex-wrap gap-4 d-flex flex-stack">
@@ -71,6 +72,7 @@
                                     </div>
                                     <!--begin::Filters-->
                                 </div>
+                                @endif
                                 <!--end::Actions-->
                             </div>
                             <!--end::Card header-->
@@ -222,8 +224,8 @@
 									</div>
 									<!--end::Row-->
                                     @php
-                                        $no = preg_replace('/^62/', '', $pustakawan->no_wa); 
-                                        $no = preg_replace('/^0/', '', $no); 
+                                        $no = preg_replace('/^62/', '', $pustakawan->no_wa);
+                                        $no = preg_replace('/^0/', '', $no);
 
                                         $formatted = preg_replace('/(\d{3})(\d{4})(\d{4})/', '$1-$2-$3', $no);
                                     @endphp

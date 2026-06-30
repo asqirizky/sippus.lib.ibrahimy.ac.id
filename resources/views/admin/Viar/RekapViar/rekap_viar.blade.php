@@ -88,7 +88,6 @@
                         <div class="card-title">
                             <a href="{{ route('viar-mandiri') }}" class="btn btn-warning me-4">Mandiri</a>
                         </div>
-
                         <div class="gap-2 card-toolbar d-flex justify-content-end align-items-center">
                             <form action="" method="GET" class="gap-2 d-flex align-items-center">
                                 <input class="form-control mw-150px" type="date" name="tanggal" value="{{ $tanggal ?? date('Y-m-d') }}">

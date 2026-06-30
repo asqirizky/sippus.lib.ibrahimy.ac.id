@@ -4,7 +4,6 @@ namespace App\Models\Master;
 
 use App\Models\Absen\AbsenKhidmah;
 use App\Models\Absen\AbsenStruktural;
-use App\Models\Barokah\BarokahPustakawan;
 use App\Models\Barokah\BarokahStruktural;
 use App\Models\Master\Ruang;
 use Illuminate\Database\Eloquent\Model;
@@ -54,11 +53,5 @@ class Pustakawan extends Model
     {
         return $this->hasMany(BarokahStruktural::class, 'pustakawan_id');
     }
-
-     public function barokahs()
-    {
-        return $this->hasMany(BarokahPustakawan::class, 'pustakawan_id');
-    }
-
 
 }

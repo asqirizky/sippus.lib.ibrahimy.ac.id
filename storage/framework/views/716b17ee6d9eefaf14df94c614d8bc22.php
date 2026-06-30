@@ -84,7 +84,7 @@
 											<span class="text-gray-500 fw-semibold">
 												<?php if($item->persentase < 50 ): ?>
 													<div class="px-4 py-3 badge fs-6 badge-light-danger"><?php echo e($item->persentase); ?>%</div>
-												<?php elseif($item->persentase > 80 ): ?>
+												<?php elseif($item->persentase > 50 ): ?>
 													<div class="px-4 py-3 badge fs-6 badge-light-success"><?php echo e($item->persentase); ?>%</div>
 												<?php endif; ?>
 											</span>

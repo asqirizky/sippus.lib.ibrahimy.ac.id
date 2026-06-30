@@ -52,13 +52,15 @@
                     <div class="gap-2 py-5 card-header align-items-center gap-md-5 " style="background-image: url('/admin/assets/media/pattern.png'); background-size: 350px; background-position: right; background-repeat: no-repeat; background-color: #7239EA;">
                         <!--begin::Card title-->
                         <div class="gap-2 card-toolbar d-flex justify-content-end align-items-center">
-                             <!--begin::Card toolbar-->
-                             <div class="card-toolbar">
+                            <!--begin::Card toolbar-->
+                            <div class="card-toolbar">
+                                <?php if(auth()->user()->hasPermissionTo('viar barokah-tambah')): ?>
                                 <!--begin::Select-->
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#kt_modal_update_details">
                                     <i class="ki-outline ki-plus fs-2"></i>Tambah Nominal Barokah
                                 </button>
                                 <!--end::Select-->
+                                <?php endif; ?>
                                 <?php echo $__env->make('admin.Viar.BarokahViar.TambahBarokahViar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                             </div>
                             <!--end::Card toolbar-->
@@ -99,20 +101,23 @@
                                         <i class="ki-outline ki-down fs-5 ms-1"></i></a>
                                         <!--begin::Menu-->
                                         <div class="py-4 menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px" data-kt-menu="true">
+                                        <?php if(auth()->user()->hasPermissionTo('viar barokah-edit')): ?>
+
                                             <!--begin::Menu item-->
                                             <div class="px-3 menu-item">
                                                 <a class="px-3 menu-link" data-bs-toggle="modal" data-bs-target="#kt_modal_new_target<?php echo e($item->id); ?>">Edit</a>
                                             </div>
                                             <!--end::Menu item-->
+                                        <?php endif; ?>
+                                        <?php if(auth()->user()->hasPermissionTo('viar barokah-hapus')): ?>
                                             <!--begin::Menu item-->
                                             <div class="px-3 menu-item">
                                                 <a href="<?php echo e(route('viar.barokah.destroy', $item->id)); ?>" class="px-3 menu-link delete-button" data-kt-users-table-filter="delete_row" data-confirm-delete="true">Hapus</a>
                                             </div>
                                             <!--end::Menu item-->
+                                        <?php endif; ?>
                                         </div>
-
-                                            <?php echo $__env->make('admin.Viar.BarokahViar.barokah_viar_update', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-
+                                        <?php echo $__env->make('admin.Viar.BarokahViar.barokah_viar_update', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                                         <!--end::Menu-->
                                     </td>
                                 </tr>

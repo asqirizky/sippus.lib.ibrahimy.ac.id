@@ -26,30 +26,62 @@
                 </div>
                 <!--end::Heading-->
                 <!--begin::Input group-->
-                <div class="text-center fv-row mb-2">
+                <div class="text-center fv-row mb-7">
                     <!--begin::Label-->
-                    <div class="card-body d-flex flex-center flex-column">
-                        <!--begin::Avatar-->
-                        <div class="symbol symbol-125px symbol-circle mb-4">
-                            <img src="{{ asset('/storage/foto/' . $item->foto) }}" alt="image" />
+                    <label class="d-block fw-semibold-solid fs-6 mb-5">{{ $item->pustakawan->nama_pustakawan }}</label>
+                    <!--end::Label-->
+                    <!--begin::Image placeholder-->
+                    <style>.image-input-placeholder { background-image: url('admin/assets/media/svg/files/blank-image.svg'); } [data-bs-theme="dark"] .image-input-placeholder { background-image: url('admin/assets/media/svg/files/blank-image-dark.svg'); }</style>
+                    <!--end::Image placeholder-->
+                    <!--begin::Image input-->
+                    <div class="image-input image-input-outline image-input-placeholder" data-kt-image-input="true">
+                        <!--begin::Preview existing avatar-->
+                        <div class="image-input-wrapper w-125px h-125px" style="background-image: url({{ asset('/admin/assets/media/' . ($item->pustakawan->foto ?? 'default.png')) }});"></div>
+                        <!--end::Preview existi-->
+                    </div>
+                    <!--end::Image input-->
+                </div>
+                <!--end::Input group-->
+                <!--end::Input group-->
+                <!--begin::Main wrapper-->
+                <div class="fv-row" data-kt-password-meter="true">
+                    <!--begin::Wrapper-->
+                    <div class="mb-1">
+                        <!--begin::Label-->
+                        <label class="form-label fw-semibold fs-6 mb-2">
+                            Password Baru
+                        </label>
+                        <!--end::Label-->
+                        <!--begin::Input wrapper-->
+                        <div class="position-relative mb-3">
+                            <input class="form-control form-control-lg"
+                                type="password" placeholder="Password Baru" name="password" autocomplete="off" />
+                            <!--begin::Visibility toggle-->
+                            <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
+                                data-kt-password-meter-control="visibility">
+                                    <i class="ki-duotone ki-eye-slash fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                    <i class="ki-duotone ki-eye d-none fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                            </span>
+                            <!--end::Visibility toggle-->
                         </div>
-                        <!--end::Avatar-->
-                        <!--begin::Name-->
-                        <a href="#" class="fs-2 text-gray-800 text-hover-primary fw-bold mb-2">{{ $item->name }}</a>
-                        <!--end::Name-->
+                        <!--end::Input wrapper-->
+                        <!--begin::Highlight meter-->
+                        <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
+                            <div class="flex-grow-1 bg-secondary bg-active-danger rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-warning rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
+                        </div>
+                        <!--end::Highlight meter-->
+                    </div>
+                    <!--end::Wrapper-->
+                    <!--begin::Hint-->
+                    <div class="text-muted">
+                        Gunakan 8 karakter atau lebih dengan campuran huruf, angka atau simbol.
                     </div>
                     <!--end::Hint-->
                 </div>
-                <!--end::Input group-->
-                <!--end::Input group-->
-                <div class="fv-row mb-7">
-                    <!--begin::Label-->
-                    <label class="required fw-bold fs-6 mb-2">Password Baru</label>
-                    <!--end::Label-->
-                    <!--begin::Input-->
-                    <input type="password" id="password" name="password" class="form-control mb-3 mb-lg-0" placeholder="Password" required autocomplete="password" autofocus />
-                    <!--end::Input-->
-                </div>
+                <!--end::Main wrapper-->
                 <div class="fv-row mb-15">
                     <!--begin::Label-->
                     <label class="required fw-bold fs-6 mb-2">Konfirmasi Password Baru</label>

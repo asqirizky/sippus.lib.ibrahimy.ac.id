@@ -56,7 +56,7 @@
                         </div>
                         <!--end::Card title-->
                         <!--begin::Card toolbar-->
-                        @if(auth()->user()->hasPermissionTo('akses pengguna-tambah'))
+                        @if (auth()->user()->hasPermissionTo('hak akses-tambah'))
                         <div class="card-toolbar">
                             <!--begin::Button-->
                             <button type="button" class="btn btn-light-danger" data-bs-toggle="modal" data-bs-target="#kt_modal_add_permission">
@@ -90,27 +90,15 @@
                                             <div class="badge badge-light-danger">Tidak ada pengguna yang memiliki hak akses ini.</div>
                                         @else
                                             @foreach ($item->users as $user)
-                                                <div class="badge py-3 px-4 fs-7 badge-light-primary my-1">{{ $user->name }}</div>
+                                                <div class="badge py-3 px-4 fs-7 badge-light-primary my-1">{{ $user->pustakawan->nama_pustakawan }}</div>
                                             @endforeach
                                         @endif
                                     </td>
-                                    {{-- <td>{{ Carbon\Carbon::parse($item->created_at)->isoFormat('D MMMM Y - h:m') }}</td>
-                                    <td class="text-end pe-4">
-                                        @if(auth()->user()->hasPermissionTo('akses pengguna-edit'))
-                                        <button class="btn btn-icon btn-active-light-primary w-30px h-30px me-3" data-bs-toggle="modal" data-bs-target="#kt_modal_update_permission{{ $item->id }}">
-                                            <i class="ki-outline ki-setting-3 fs-3"></i>
-                                        </button>
-                                        @endif
-                                        @if(auth()->user()->hasPermissionTo('akses pengguna-hapus'))
-                                        <a href="{{ asset('/admin/pengguna-akses/'.$item->id.'/hapus') }}" class="btn btn-icon btn-active-light-primary w-30px h-30px delete-button"><i class="ki-outline ki-trash fs-3"></i></a>
-                                        @endif
-                                    </td> --}}
                                     @include('admin.user.permission.edit')
                                     <td></td>
                                     <td class="text-end pe-4"><div class="badge py-3 px-4 fs-7 badge-danger">{{ Carbon\Carbon::parse($item->created_at)->isoFormat('D MMMM Y') }}</div></td>
                                 </tr>
                                 @endforeach
-
                             </tbody>
                         </table>
                         <!--end::Table-->

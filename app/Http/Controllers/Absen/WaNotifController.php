@@ -317,43 +317,77 @@ class WaNotifController extends Controller
 
                         } else {
 
-                            $shift = $jadwal->jadwal;
+                            $hariMap = [
+                                'Sunday'    => 'Minggu',
+                                'Monday'    => 'Senin',
+                                'Tuesday'   => 'Selasa',
+                                'Wednesday' => 'Rabu',
+                                'Thursday'  => 'Kamis',
+                                'Friday'    => 'Jumat',
+                                'Saturday'  => 'Sabtu',
+                            ];
 
-                            $sudahAbsen = AbsenStruktural::where('pustakawan_id', $pustakawan->id)
-                                ->whereDate('tanggal', today())
-                                ->whereHas('jadwal', function ($q) use ($shift) {
-                                    $q->where('jadwal', $shift);
-                                })
-                                ->exists();
+                            $hari = $hariMap[now()->format('l')];
 
-                            if ($sudahAbsen) {
+                            $jadwalPustakawan = DB::table('pustakawan_jadwal')
+                                ->where('pustakawan_id', $pustakawan->id)
+                                ->where('hari', $hari)
+                                ->first();
 
-                                $balasan = "*Tidak perlu absen dua kali.*\n"
-                                . "Anda sudah melakukan presensi shift {$shift} hari ini.";
+                            if (!$jadwalPustakawan) {
+
+                                $balasan = "*Presensi Gagal!*\n"
+                                    . "Anda tidak memiliki jadwal pada hari {$hari}.";
 
                             } else {
 
-                                AbsenStruktural::create([
-                                    'pustakawan_id' => $pustakawan->id,
-                                    'jadwal_id' => $jadwal->id,
-                                    'tanggal' => now()->toDateString(),
-                                    'jam_masuk' => now()->format('H:i:s'),
-                                    'keterangan' => 'Hadir',
-                                ]);
+                                $shift = $jadwal->jadwal;
+                                $kolomShift = strtolower($shift);
 
-                                Log::info('ABSEN BERHASIL', [
-                                    'nama_pustakawan' => $pustakawan->nama_pustakawan,
-                                    'shift' => $shift,
-                                ]);
+                                if (
+                                    !isset($jadwalPustakawan->$kolomShift) ||
+                                    $jadwalPustakawan->$kolomShift != 1
+                                ) {
+                                    $balasan = "*Presensi Gagal!*\n"
+                                    . "Anda tidak memiliki shift {$shift} pada hari {$hari}.";
+                                } else {
+                                    $sudahAbsen = AbsenStruktural::where('pustakawan_id', $pustakawan->id)
+                                        ->whereDate('tanggal', today())
+                                        ->whereHas('jadwal', function ($q) use ($shift) {
+                                            $q->where('jadwal', $shift);
+                                        })
+                                        ->exists();
 
-                                $balasan = "*Presensi Berhasil!*\n\n"
-                                    . "Nama: {$pustakawan->nama_pustakawan}\n"
-                                    . "Shift: {$shift}\n"
-                                    . "Tanggal: " . now()->format('d-m-Y') . "\n"
-                                    . "Jam: " . now()->format('H:i') . "\n"
-                                    . "Jarak: " . round($jarakUser) . " meter\n\n"
-                                    . "Terima kasih sudah melakukan absensi hari ini."
-                                    . " Semoga seluruh urusan Anda diberi kelancaraan oleh Allah Subhanahu Wata'ala";
+                                    if ($sudahAbsen) {
+
+                                        $balasan = "*Tidak perlu absen dua kali.*\n"
+                                        . "Anda sudah melakukan presensi shift {$shift} hari ini.";
+
+                                    } else {
+
+                                        AbsenStruktural::create([
+                                            'pustakawan_id' => $pustakawan->id,
+                                            'jadwal_id' => $jadwal->id,
+                                            'tanggal' => now()->toDateString(),
+                                            'jam_masuk' => now()->format('H:i:s'),
+                                            'keterangan' => 'Hadir',
+                                        ]);
+
+                                        Log::info('ABSEN BERHASIL', [
+                                            'nama_pustakawan' => $pustakawan->nama_pustakawan,
+                                            'shift' => $shift,
+                                        ]);
+
+                                        $balasan = "*Presensi Berhasil!*\n\n"
+                                            . "Nama: {$pustakawan->nama_pustakawan}\n"
+                                            . "Shift: {$shift}\n"
+                                            . "Tanggal: " . now()->format('d-m-Y') . "\n"
+                                            . "Jam: " . now()->format('H:i') . "\n"
+                                            . "Jarak: " . round($jarakUser) . " meter\n\n"
+                                            . "Terima kasih sudah melakukan absensi hari ini."
+                                            . " Semoga seluruh urusan Anda diberi kelancaraan oleh Allah Subhanahu Wata'ala";
+                                    }
+                                }
                             }
                         }
                     }

@@ -61,11 +61,11 @@
 							<div class="d-flex flex-center flex-column py-5">
 								<!--begin::Avatar-->
 								<div class="symbol symbol-100px symbol-circle mb-7">
-									<img src="{{ asset('/storage/foto/' . $user->foto) }}" alt="image" />
+									<img src="{{ asset('/admin/assets/media/' . $user->pustakawan->foto) }}" alt="image" />
 								</div>
 								<!--end::Avatar-->
 								<!--begin::Name-->
-								<div class="fs-3 text-gray-800 fw-bold mb-3">{{ $user->name }}</div>
+								<div class="fs-3 text-gray-800 fw-bold mb-3">{{ $user->pustakawan->nama_pustakawan }}</div>
 								<!--end::Name-->
 								<!--begin::Position-->
 								<div class="mb-9">
@@ -92,20 +92,20 @@
 								<div class="pb-5 fs-6">
 									<!--begin::Details item-->
 									<div class="fw-bold mt-5">Nama</div>
-									<div class="text-gray-600">{{ $user->name }}</div>
+									<div class="text-gray-600">{{ $user->pustakawan->nama_pustakawan }}</div>
 									<!--begin::Details item-->
 									<!--begin::Details item-->
 									<div class="fw-bold mt-5">Username</div>
 									<div class="text-gray-600">{{ $user->username }}</div>
 									<!--begin::Details item-->
 									<!--begin::Details item-->
-									<div class="fw-bold mt-5">ID Staff</div>
-									<div class="text-gray-600">{{ $user->idstaf }}</div>
+									<div class="fw-bold mt-5">NIK</div>
+									<div class="text-gray-600">{{ $user->pustakawan->nik }}</div>
 									<!--begin::Details item-->
 									<!--begin::Details item-->
 									<div class="fw-bold mt-5">Jabatan</div>
 									<div class="text-gray-600">
-										<span class="text-gray-600">{{ $user->jabatan }}</span>
+										<span class="text-gray-600">{{ $user->pustakawan->jabatan->nama_jabatan }}</span>
 									</div>
 									<!--begin::Details item-->
 									<!--begin::Details item-->
@@ -226,21 +226,8 @@
     </div>
 </div>
 <!--begin::Global Javascript Bundle(mandatory for all pages)-->
-<script src="{{ asset('admin/assets/plugins/global/plugins.bundle.js') }}"></script>
-<script src="{{ asset('admin/assets/js/scripts.bundle.js') }}"></script>
-<!--begin::Veadmin/ndors Javascript(used for this page only)-->
-<script src="admin/assets/plugins/custom/datatables/datatables.bundle.js"></script>
-<!--end::Vendadmin/ors Javascript-->
-<!--begin::Cuadmin/stom Javascript(used for this page only)-->
-<script src="admin/assets/js/custom/apps/user-management/users/list/table.js"></script>
-<script src="admin/assets/js/custom/apps/user-management/users/list/export-users.js"></script>
-<script src="admin/assets/js/custom/apps/user-management/users/list/add.js"></script>
-<script src="admin/assets/js/widgets.bundle.js"></script>
-<script src="admin/assets/js/custom/widgets.js"></script>
-<script src="admin/assets/js/custom/apps/chat/chat.js"></script>
-<script src="admin/assets/js/custom/utilities/modals/upgrade-plan.js"></script>
-<script src="admin/assets/js/custom/utilities/modals/create-app.js"></script>
-<script src="admin/assets/js/custom/utilities/modals/users-search.js"></script>
+<script src="{{ asset('/admin/assets/plugins/global/plugins.bundle.js') }}"></script>
+<script src="{{ asset('/admin/assets/js/scripts.bundle.js') }}"></script>
 <!--end::Custom Javascript-->
 
 <script>

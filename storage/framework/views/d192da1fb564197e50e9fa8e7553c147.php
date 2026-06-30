@@ -16,118 +16,87 @@
         <!--begin::Modal body-->
         <div class="modal-body scroll-y px-15 px-lg-15 pt-0 pb-15">
             <!--begin:Form-->
-            <form id="kt_modal_update_details" class="form" method="POST" enctype="multipart/form-data" action="/admin/pengguna"">
+            <form id="kt_modal_update_details" class="form" method="POST" enctype="multipart/form-data" action="/admin/pengguna">
                 <?php echo csrf_field(); ?>
                 <!--begin::Heading-->
                 <div class="mb-13 text-center">
                     <!--begin::Title-->
                     <h1 class="mb-3">Tambah Akun</h1>
-                    <div class="text-muted fw-semibold fs-5">Tambahkan akun pengguna pengelola website.</div>
+                    <div class="text-muted fw-semibold fs-5">Tambahkan akun pengguna pengelola.</div>
                     <!--end::Title-->
                 </div>
                 <!--end::Heading-->
-                <!--begin::Input group-->
-                <!--begin::Input group-->
-                <div class="text-center fv-row mb-7">
-                    <!--begin::Label-->
-                    <label class="d-block fw-semibold fs-6 mb-5">Foto Profil</label>
-                    <!--end::Label-->
-                    <!--begin::Image placeholder-->
-                    <style>.image-input-placeholder { background-image: url('admin/assets/media/svg/files/blank-image.svg'); } [data-bs-theme="dark"] .image-input-placeholder { background-image: url('admin/assets/media/svg/files/blank-image-dark.svg'); }</style>
-                    <!--end::Image placeholder-->
-                    <!--begin::Image input-->
-                    <div class="image-input image-input-outline image-input-placeholder" data-kt-image-input="true">
-                        <!--begin::Preview existing avatar-->
-                        <div class="image-input-wrapper w-125px h-125px" style="background-image: url(admin/assets/media/avatars/blank.png);"></div>
-                        <!--end::Preview existing avatar-->
-                        <!--begin::Label-->
-                        <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Upload Foto">
-                            <i class="ki-outline ki-pencil fs-7">
-                            </i>
-                            <!--begin::Inputs-->
-                            <input type="file" name="foto" id="foto" value="blank.png" accept=".png, .jpg, .jpeg" required autocomplete="foto"/>
-                            <input type="hidden" name="avatar_remove" />
-                            <!--end::Inputs-->
-                        </label>
-                        <!--end::Label-->
-                        <!--begin::Cancel-->
-                        <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Cancel Foto">
-                            <i class="ki-outline ki-cross fs-2">
-                            </i>
-                        </span>
-                        <!--end::Cancel-->
-                        <!--begin::Remove-->
-                        <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="remove" data-bs-toggle="tooltip" title="Hapus foto">
-                            <i class="ki-outline ki-cross fs-2">
-                            </i>
-                        </span>
-                        <!--end::Remove-->
-                    </div>
-                    <!--end::Image input-->
-                    <!--begin::Hint-->
-                    <div class="form-text">File memiliki format: png, jpg, jpeg.</div>
-                    <!--end::Hint-->
-                </div>
-                <!--end::Input group-->
                 <!--begin::Input group-->
                 <div class="fv-row mb-7">
                     <!--begin::Label-->
                     <label class="required fw-semibold fs-6 mb-2">Nama Pengguna</label>
                     <!--end::Label-->
                     <!--begin::Input-->
-                    <input type="text" name="name" id="name" class="form-control mb-3 mb-lg-0" placeholder="Nama Pengguna" required autocomplete="name" />
+                    <select class="form-select" name="pustakawan_id" data-control="select2" data-hide-search="true">
+                        <option selected disabled>Pilih Pengguna</option>
+                        <?php $__currentLoopData = $pustakawan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($item->id); ?>"><?php echo e($item->nama_pustakawan); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
                     <!--end::Input-->
                 </div>
                 <!--end::Input group-->
                 <!--begin::Input group-->
                 <div class="fv-row mb-7">
                     <!--begin::Label-->
-                    <label class="required fw-semibold fs-6 mb-2">ID-Staff</label>
+                    <label class="required fw-bold fs-6 mb-2">Username</label>
                     <!--end::Label-->
                     <!--begin::Input-->
-                    <input type="text" name="idstaf" id="idstaf" class="form-control mb-3 mb-lg-0" placeholder="ID Staff" required autocomplete="idstaf" />
+                    <input type="text" name="username" class="form-control mb-3 mb-lg-0" placeholder="Username" required/>
                     <!--end::Input-->
                 </div>
                 <!--end::Input group-->
-
+                <!--begin::Main wrapper-->
+                <div class="fv-row" data-kt-password-meter="true">
+                    <!--begin::Wrapper-->
+                    <div class="mb-1">
+                        <!--begin::Label-->
+                        <label class="form-label fw-semibold fs-6 mb-2">Password Baru</label>
+                        <!--end::Label-->
+                        <!--begin::Input wrapper-->
+                        <div class="position-relative mb-3">
+                            <input class="form-control form-control-lg" type="password" placeholder="Password Baru" minlength="8" name="password" autocomplete="off" />
+                            <!--begin::Visibility toggle-->
+                            <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
+                                data-kt-password-meter-control="visibility">
+                                    <i class="ki-duotone ki-eye-slash fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                    <i class="ki-duotone ki-eye d-none fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                            </span>
+                            <!--end::Visibility toggle-->
+                        </div>
+                        <!--end::Input wrapper-->
+                        <!--begin::Highlight meter-->
+                        <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
+                            <div class="flex-grow-1 bg-secondary bg-active-danger rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-warning rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
+                        </div>
+                        <!--end::Highlight meter-->
+                    </div>
+                    <!--end::Wrapper-->
+                    <!--begin::Hint-->
+                    <div class="text-muted">
+                        Gunakan 8 karakter atau lebih dengan campuran huruf, angka atau simbol.
+                    </div>
+                    <!--end::Hint-->
+                </div>
+                <!--end::Main wrapper-->
                 <!--begin::Input group-->
-                <div class="fv-row mb-7">
-                    <!--begin::Label-->
-                    <label class="required fw-semibold fs-6 mb-2">Jabatan</label>
-                    <!--end::Label-->
-                    <!--begin::Input-->
-                    <input type="text" name="jabatan" id="jabatan" class="form-control mb-3 mb-lg-0" placeholder="Jabatan Instansi" required autocomplete="jabatan" />
-                    <!--end::Input-->
-                </div>
-                <!--end::Input group-->
-                <!--begin::Input group-->
-                <div class="fv-row mb-7">
-                    <!--begin::Label-->
-                    <label class="required fw-semibold fs-6 mb-2">Tempat Khidmah</label>
-                    <!--end::Label-->
-                    <!--begin::Input-->
-                    <select class="form-select" name="tempat" data-control="select2" data-hide-search="true" data-placeholder="Pilih Tempat Khidmah">
-                        <option></option>
-                    </select>                    
-                    <!--end::Input-->
-                </div>
-                <!--end::Input group-->
-                <div class="fv-row mb-7">
-                    <!--begin::Label-->
-                    <label class="required fw-bold fs-6 mb-2">Password</label>
-                    <!--end::Label-->
-                    <!--begin::Input-->
-                    <input type="password" id="password" name="password" class="form-control mb-3 mb-lg-0" placeholder="Password" required autocomplete="password" autofocus />
-                    <!--end::Input-->
-                </div>
                 <div class="fv-row mb-7">
                     <!--begin::Label-->
                     <label class="required fw-bold fs-6 mb-2">Konfirmasi Password</label>
                     <!--end::Label-->
                     <!--begin::Input-->
-                    <input id="password-confirm" type="password" name="password_confirmation" class="form-control mb-3 mb-lg-0" placeholder="Konfirmasi Password" required autocomplete="password-confirm"/>
+                    <input id="password-confirm" type="password" name="password_confirmation" class="form-control mb-3 mb-lg-0" minlength="8" placeholder="Konfirmasi Password" required autocomplete="password-confirm"/>
                     <!--end::Input-->
                 </div>
+                <!--end::Input group-->
                 <!--begin::Actions-->
                 <div class="text-center">
                     <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Cancel</button>
@@ -150,16 +119,49 @@
 <!--end::Modal - Update user details-->
 
 <script src="admin/assets/plugins/global/plugins.bundle.js"></script>
-
+<script src="admin/assets/js/custom/utilities/modals/bidding.js"></script>
 
 <script>
-    $("#kt_datepicker_2").flatpickr({
-        dateFormat: "j F Y",
+document.addEventListener('DOMContentLoaded', function () {
+
+    const passwordInput = document.getElementById('password');
+    const meterBars = document.querySelectorAll('.meter-bar');
+    const message = document.getElementById('password-message');
+
+    passwordInput.addEventListener('input', function () {
+
+        const length = this.value.length;
+
+        meterBars.forEach(bar => {
+            bar.classList.remove(
+                'bg-success',
+                'bg-danger',
+                'bg-warning',
+                'bg-secondary'
+            );
+        });
+
+        if (length < 8) {
+
+            meterBars.forEach(bar => {
+                bar.classList.add('bg-danger');
+            });
+
+            message.style.display = 'block';
+            message.innerText = 'Password minimal 8 karakter';
+
+        } else {
+
+            meterBars.forEach(bar => {
+                bar.classList.add('bg-success');
+            });
+
+            message.style.display = 'none';
+        }
     });
 
+});
 </script>
-
-<script src="admin/assets/js/custom/utilities/modals/bidding.js"></script>
 
 
 
