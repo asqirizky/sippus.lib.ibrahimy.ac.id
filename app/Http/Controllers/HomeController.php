@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Absen\AbsenKhidmah;
 use App\Models\Absen\AbsenStruktural;
 use App\Models\Master\Jadwal;
 use App\Models\Master\Pustakawan;
@@ -52,7 +53,11 @@ class HomeController extends Controller
 
     foreach ($pustakawan as $item) {
 
-    $jumlahHadir = AbsenStruktural::where('pustakawan_id', $item->id)
+    $isKhidmah = $item->jabatan && strtolower($item->jabatan->nama_jabatan) === 'tenaga khidmah';
+
+    $queryAbsen = $isKhidmah ? AbsenKhidmah::class : AbsenStruktural::class;
+
+    $jumlahHadir = $queryAbsen::where('pustakawan_id', $item->id)
         ->whereBetween('tanggal', [$startDate, $endDate])
         ->count();
 
@@ -103,7 +108,7 @@ class HomeController extends Controller
                 continue;
             }
 
-            $hadir = AbsenStruktural::where('pustakawan_id', $item->id)
+            $hadir = $queryAbsen::where('pustakawan_id', $item->id)
                 ->whereDate('tanggal', $tanggal)
                 ->whereHas('jadwal', function ($q) use ($shift) {
                     $q->whereRaw('LOWER(jadwal) = ?', [$shift]);

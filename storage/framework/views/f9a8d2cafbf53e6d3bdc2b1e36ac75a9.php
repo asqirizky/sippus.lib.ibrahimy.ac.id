@@ -1,6 +1,4 @@
-@extends('layout.sidebarnavbar')
-{{-- @extends('layouts.app') --}}
-@section('admin-konten')
+<?php $__env->startSection('admin-konten'); ?>
 
 <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
     <!--begin::Content wrapper-->
@@ -33,7 +31,7 @@
                     <!--end::Breadcrumb-->
                 </div>
                 <!--end::Page title-->
-                @include('layout.preview')
+                <?php echo $__env->make('layout.preview', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
             </div>
             <!--end::Toolbar container-->
         </div>
@@ -63,7 +61,7 @@
 							<div class="card-body">
 								<!--begin::Scroll-->
 								<div class="hover-scroll-overlay-y pe-6 me-n6" style="height: 415px">
-									@foreach ( $pustakawan as $item )
+									<?php $__currentLoopData = $pustakawan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 									<!--begin::Item-->
 									<div class="d-flex flex-stack">
 										<!--begin::Wrapper-->
@@ -71,10 +69,10 @@
 											<!--begin::Section-->
 											<div class="flex-grow-1">
 												<!--begin::Text-->
-												<a class="text-gray-800 text-hover-primary fs-5 fw-bold lh-0"> {{ $item->nama_pustakawan }} </a>
+												<a class="text-gray-800 text-hover-primary fs-5 fw-bold lh-0"> <?php echo e($item->nama_pustakawan); ?> </a>
 												<!--end::Text-->
 												<!--begin::Description-->
-												<span class="text-gray-500 fw-semibold d-block fs-6"> {{ $item->jabatan->nama_jabatan }} </span>
+												<span class="text-gray-500 fw-semibold d-block fs-6"> <?php echo e($item->jabatan->nama_jabatan); ?> </span>
 												<!--end::Description=-->
 											</div>
 											<!--end::Section-->
@@ -84,11 +82,11 @@
 										<div class="d-flex align-items-center w-125 mw-100px">
 											<!--begin::Value-->
 											<span class="text-gray-500 fw-semibold">
-												@if ($item->persentase < 50 )
-													<div class="px-4 py-3 badge fs-6 badge-light-danger">{{ $item->persentase }}%</div>
-												@elseif ($item->persentase > 50 )
-													<div class="px-4 py-3 badge fs-6 badge-light-success">{{ $item->persentase }}%</div>
-												@endif
+												<?php if($item->persentase < 50 ): ?>
+													<div class="px-4 py-3 badge fs-6 badge-light-danger"><?php echo e($item->persentase); ?>%</div>
+												<?php elseif($item->persentase > 50 ): ?>
+													<div class="px-4 py-3 badge fs-6 badge-light-success"><?php echo e($item->persentase); ?>%</div>
+												<?php endif; ?>
 											</span>
 											<!--end::Value-->
 										</div>
@@ -98,7 +96,7 @@
 									<!--begin::Separator-->
 									<div class="separator separator-dashed my-3"></div>
 									<!--end::Separator-->
-									@endforeach
+									<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 								</div>
 								<!--end::Scroll-->
 							</div>
@@ -164,11 +162,11 @@
                                                                 <div class="m-0">
                                                                     <!--begin::Number-->
                                                                     <span class="text-gray-700 fw-bolder d-block fs-1 lh-1 ls-n1 mb-1">
-                                                                        {{ App\Models\Master\Pustakawan::where('status', 1)
+                                                                        <?php echo e(App\Models\Master\Pustakawan::where('status', 1)
                                                                             ->whereHas('jabatan', function ($q) {
                                                                                 $q->whereRaw('LOWER(nama_jabatan) != ?', ['tenaga khidmah']);
-                                                                            })->count()
-                                                                        }}
+                                                                            })->count()); ?>
+
                                                                     </span>
                                                                     <!--end::Number-->
                                                                 </div>
@@ -207,12 +205,12 @@
                                                                 <div class="m-0">
                                                                     <!--begin::Number-->
                                                                     <span class="text-gray-700 fw-bolder d-block fs-1 lh-1 ls-n1 mb-1">
-                                                                        {{ App\Models\Master\Pustakawan::where('status', 1)
+                                                                        <?php echo e(App\Models\Master\Pustakawan::where('status', 1)
                                                                             ->whereHas('jabatan', function ($q) {
                                                                                 $q->whereRaw('LOWER(nama_jabatan) = ?', ['tenaga khidmah']);
                                                                             })
-                                                                            ->count()
-                                                                        }}
+                                                                            ->count()); ?>
+
                                                                     </span>
                                                                     <!--end::Number-->
                                                                 </div>
@@ -250,7 +248,7 @@
                                                                 <!--begin::Item-->
                                                                 <div class="m-0">
                                                                     <!--begin::Number-->
-                                                                    <span class="text-gray-700 fw-bolder d-block fs-1 lh-1 ls-n1 mb-1">{{ App\Models\Master\Pustakawan::where('status', 1)->count() }}</span>
+                                                                    <span class="text-gray-700 fw-bolder d-block fs-1 lh-1 ls-n1 mb-1"><?php echo e(App\Models\Master\Pustakawan::where('status', 1)->count()); ?></span>
                                                                     <!--end::Number-->
                                                                 </div>
                                                                 <!--end::Item-->
@@ -404,9 +402,9 @@
 												<!--end::Wrapper-->
 											</div>
 											<!--end::Item-->
-											@php
+											<?php
 
-											@endphp
+											?>
 											<!--begin::Item-->
 											<div class="carousel-item">
 												<!--begin::Wrapper-->
@@ -495,8 +493,10 @@
     </div>
     <!--end::Content wrapper-->
 
-    @include('layout.footer')
+    <?php echo $__env->make('layout.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!--end::Footer-->
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layout.sidebarnavbar', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /var/www/html/resources/views/admin/home.blade.php ENDPATH**/ ?>

@@ -16,10 +16,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Buat Permissions
-        Permission::create(['name' => 'atur pengguna']);
-        Permission::create(['name' => 'edit posts']);
-        Permission::create(['name' => 'delete posts']);
-        Permission::create(['name' => 'view reports']);
+        Permission::create(['name' => 'atur pengguna', 'category' => 'general']);
+        Permission::create(['name' => 'edit posts', 'category' => 'general']);
+        Permission::create(['name' => 'delete posts', 'category' => 'general']);
+        Permission::create(['name' => 'view reports', 'category' => 'general']);
         // Berikan izin langsung ke user tertentu
         $admin = User::where('username', 'admin')->first();
         if ($admin) {
