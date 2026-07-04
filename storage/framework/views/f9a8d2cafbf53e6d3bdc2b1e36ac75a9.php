@@ -82,11 +82,13 @@
 										<div class="d-flex align-items-center w-125 mw-100px">
 											<!--begin::Value-->
 											<span class="text-gray-500 fw-semibold">
-												<?php if($item->persentase < 50 ): ?>
-													<div class="px-4 py-3 badge fs-6 badge-light-danger"><?php echo e($item->persentase); ?>%</div>
-												<?php elseif($item->persentase > 50 ): ?>
-													<div class="px-4 py-3 badge fs-6 badge-light-success"><?php echo e($item->persentase); ?>%</div>
-												<?php endif; ?>
+                                                <?php if($item->persentase < 50 ): ?>
+                                                    <div class="px-4 py-3 badge fs-6 badge-light-danger"><?php echo e($item->persentase); ?>%</div>
+                                                <?php elseif($item->persentase > 50 ): ?>
+                                                    <div class="px-4 py-3 badge fs-6 badge-light-success"><?php echo e($item->persentase); ?>%</div>
+                                                <?php else: ?>
+                                                    <div class="px-4 py-3 badge fs-6 badge-light-warning"><?php echo e($item->persentase); ?>%</div>
+                                                <?php endif; ?>
 											</span>
 											<!--end::Value-->
 										</div>

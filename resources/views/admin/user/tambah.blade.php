@@ -60,7 +60,7 @@
                         <!--end::Label-->
                         <!--begin::Input wrapper-->
                         <div class="position-relative mb-3">
-                            <input class="form-control form-control-lg" type="password" placeholder="Password Baru" minlength="8" name="password" autocomplete="off" />
+                            <input class="form-control form-control-lg" type="password" placeholder="Password Baru" minlength="8" name="password" id="password" autocomplete="off" />
                             <!--begin::Visibility toggle-->
                             <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
                                 data-kt-password-meter-control="visibility">
@@ -72,18 +72,19 @@
                         <!--end::Input wrapper-->
                         <!--begin::Highlight meter-->
                         <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
-                            <div class="flex-grow-1 bg-secondary bg-active-danger rounded h-5px me-2"></div>
-                            <div class="flex-grow-1 bg-secondary bg-active-warning rounded h-5px me-2"></div>
-                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-danger rounded h-5px me-2"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-warning rounded h-5px me-2"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
                         </div>
                         <!--end::Highlight meter-->
                     </div>
                     <!--end::Wrapper-->
                     <!--begin::Hint-->
-                    <div class="text-muted">
+                    {{-- <div class="text-muted">
                         Gunakan 8 karakter atau lebih dengan campuran huruf, angka atau simbol.
-                    </div>
+                    </div> --}}
+                    <div id="password-message" class="text-danger fs-7 mt-2" style="display: none;">Password minimal 8 karakter</div>
                     <!--end::Hint-->
                 </div>
                 <!--end::Main wrapper-->
@@ -94,6 +95,7 @@
                     <!--end::Label-->
                     <!--begin::Input-->
                     <input id="password-confirm" type="password" name="password_confirmation" class="form-control mb-3 mb-lg-0" minlength="8" placeholder="Konfirmasi Password" required autocomplete="password-confirm"/>
+                    <div id="password-confirm-message" class="text-danger fs-7 mt-2" style="display: none;">Password tidak cocok</div>
                     <!--end::Input-->
                 </div>
                 <!--end::Input group-->
@@ -123,43 +125,74 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
     const passwordInput = document.getElementById('password');
     const meterBars = document.querySelectorAll('.meter-bar');
     const message = document.getElementById('password-message');
 
-    passwordInput.addEventListener('input', function () {
+    const confirmInput = document.getElementById('password-confirm');
+    const confirmMessage = document.getElementById('password-confirm-message');
 
-        const length = this.value.length;
+    function checkPasswordMatch() {
+        if (confirmInput.value.length === 0) {
+            confirmMessage.style.display = 'none';
+            return;
+        }
+        if (passwordInput.value !== confirmInput.value) {
+            confirmMessage.style.display = 'block';
+        } else {
+            confirmMessage.style.display = 'none';
+        }
+    }
+
+    passwordInput.addEventListener('input', function () {
+        const password = this.value;
+        const length = password.length;
 
         meterBars.forEach(bar => {
-            bar.classList.remove(
-                'bg-success',
-                'bg-danger',
-                'bg-warning',
-                'bg-secondary'
-            );
+            bar.classList.remove('bg-danger', 'bg-warning', 'bg-success');
+            bar.classList.add('bg-secondary');
         });
 
-        if (length < 8) {
+        if (length === 0) {
+            message.style.display = 'none';
+            checkPasswordMatch();
+            return;
+        }
 
+        if (length < 8) {
             meterBars.forEach(bar => {
+                bar.classList.remove('bg-secondary');
                 bar.classList.add('bg-danger');
             });
-
             message.style.display = 'block';
-            message.innerText = 'Password minimal 8 karakter';
+            checkPasswordMatch();
+            return;
+        }
 
-        } else {
+        message.style.display = 'none';
 
+        const hasLower = /[a-z]/.test(password);
+        const hasUpper = /[A-Z]/.test(password);
+        const hasDigit = /\d/.test(password);
+        const hasSymbol = /[^a-zA-Z0-9]/.test(password);
+        const types = [hasLower, hasUpper, hasDigit, hasSymbol].filter(Boolean).length;
+
+        if (types >= 3) {
             meterBars.forEach(bar => {
+                bar.classList.remove('bg-secondary');
                 bar.classList.add('bg-success');
             });
-
-            message.style.display = 'none';
+        } else {
+            meterBars.forEach(bar => {
+                bar.classList.remove('bg-secondary');
+                bar.classList.add('bg-warning');
+            });
         }
+
+        checkPasswordMatch();
     });
 
+    confirmInput.addEventListener('input', checkPasswordMatch);
 });
 </script>
 

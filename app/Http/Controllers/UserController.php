@@ -67,6 +67,9 @@ class UserController extends Controller
 
     public function ubahpassword(Request $request, $id) : RedirectResponse
     {
+        $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
 
         $user = User::findOrFail($id);
 

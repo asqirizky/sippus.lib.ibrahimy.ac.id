@@ -84,11 +84,13 @@
 										<div class="d-flex align-items-center w-125 mw-100px">
 											<!--begin::Value-->
 											<span class="text-gray-500 fw-semibold">
-												@if ($item->persentase < 50 )
-													<div class="px-4 py-3 badge fs-6 badge-light-danger">{{ $item->persentase }}%</div>
-												@elseif ($item->persentase > 50 )
-													<div class="px-4 py-3 badge fs-6 badge-light-success">{{ $item->persentase }}%</div>
-												@endif
+                                                @if ($item->persentase < 50 )
+                                                    <div class="px-4 py-3 badge fs-6 badge-light-danger">{{ $item->persentase }}%</div>
+                                                @elseif ($item->persentase > 50 )
+                                                    <div class="px-4 py-3 badge fs-6 badge-light-success">{{ $item->persentase }}%</div>
+                                                @else
+                                                    <div class="px-4 py-3 badge fs-6 badge-light-warning">{{ $item->persentase }}%</div>
+                                                @endif
 											</span>
 											<!--end::Value-->
 										</div>

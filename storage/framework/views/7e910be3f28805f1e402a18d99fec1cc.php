@@ -16,7 +16,7 @@
         <!--begin::Modal body-->
         <div class="modal-body scroll-y px-15 px-lg-15 pt-0 pb-15">
             <!--begin:Form-->
-            <form id="kt_modal_update_details" class="form" method="POST" enctype="multipart/form-data" action="<?php echo e(asset('/admin/pengguna/ubahpassword('.$item->id.')')); ?>">
+            <form id="kt_modal_update_details" class="form" method="POST" enctype="multipart/form-data" action="<?php echo e(url('/admin/pengguna/ubahpassword/'.$item->id)); ?>">
                 <?php echo csrf_field(); ?>
                 <!--begin::Heading-->
                 <div class="mb-5 text-center">
@@ -54,8 +54,8 @@
                         <!--end::Label-->
                         <!--begin::Input wrapper-->
                         <div class="position-relative mb-3">
-                            <input class="form-control form-control-lg"
-                                type="password" placeholder="Password Baru" name="password" autocomplete="off" />
+                            <input class="form-control form-control-lg password-input"
+                                type="password" placeholder="Password Baru" name="password" id="password-<?php echo e($item->id); ?>" autocomplete="off" />
                             <!--begin::Visibility toggle-->
                             <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
                                 data-kt-password-meter-control="visibility">
@@ -67,10 +67,10 @@
                         <!--end::Input wrapper-->
                         <!--begin::Highlight meter-->
                         <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
-                            <div class="flex-grow-1 bg-secondary bg-active-danger rounded h-5px me-2"></div>
-                            <div class="flex-grow-1 bg-secondary bg-active-warning rounded h-5px me-2"></div>
-                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-danger rounded h-5px me-2"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-warning rounded h-5px me-2"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                            <div class="meter-bar flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
                         </div>
                         <!--end::Highlight meter-->
                     </div>
@@ -79,6 +79,7 @@
                     <div class="text-muted">
                         Gunakan 8 karakter atau lebih dengan campuran huruf, angka atau simbol.
                     </div>
+                    <div class="password-message text-danger fs-7 mt-2" style="display: none;">Password minimal 8 karakter</div>
                     <!--end::Hint-->
                 </div>
                 <!--end::Main wrapper-->
@@ -87,7 +88,8 @@
                     <label class="required fw-bold fs-6 mb-2">Konfirmasi Password Baru</label>
                     <!--end::Label-->
                     <!--begin::Input-->
-                    <input id="password-confirm" type="password" name="password_confirmation" class="form-control mb-3 mb-lg-0" placeholder="Konfirmasi Password" required autocomplete="password-confirm"/>
+                    <input id="password-confirm-<?php echo e($item->id); ?>" type="password" name="password_confirmation" class="form-control mb-3 mb-lg-0 password-confirm-input" placeholder="Konfirmasi Password" required autocomplete="password-confirm"/>
+                    <div class="password-confirm-message text-danger fs-7 mt-2" style="display: none;">Password tidak cocok</div>
                     <!--end::Input-->
                 </div>
                 <!--begin::Actions-->
@@ -120,6 +122,75 @@
         dateFormat: "j F Y",
     });
 
+    document.querySelectorAll('.password-input').forEach(function(input) {
+        const modal = input.closest('.modal');
+        const meterBars = modal.querySelectorAll('.meter-bar');
+        const message = modal.querySelector('.password-message');
+        const confirmInput = modal.querySelector('.password-confirm-input');
+        const confirmMessage = modal.querySelector('.password-confirm-message');
+
+        function checkPasswordMatch() {
+            if (confirmInput.value.length === 0) {
+                confirmMessage.style.display = 'none';
+                return;
+            }
+            if (input.value !== confirmInput.value) {
+                confirmMessage.style.display = 'block';
+            } else {
+                confirmMessage.style.display = 'none';
+            }
+        }
+
+        input.addEventListener('input', function () {
+            const password = this.value;
+            const length = password.length;
+
+            meterBars.forEach(bar => {
+                bar.classList.remove('bg-danger', 'bg-warning', 'bg-success');
+                bar.classList.add('bg-secondary');
+            });
+
+            if (length === 0) {
+                message.style.display = 'none';
+                checkPasswordMatch();
+                return;
+            }
+
+            if (length < 8) {
+                meterBars.forEach(bar => {
+                    bar.classList.remove('bg-secondary');
+                    bar.classList.add('bg-danger');
+                });
+                message.style.display = 'block';
+                checkPasswordMatch();
+                return;
+            }
+
+            message.style.display = 'none';
+
+            const hasLower = /[a-z]/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
+            const hasDigit = /\d/.test(password);
+            const hasSymbol = /[^a-zA-Z0-9]/.test(password);
+            const types = [hasLower, hasUpper, hasDigit, hasSymbol].filter(Boolean).length;
+
+            if (types >= 3) {
+                meterBars.forEach(bar => {
+                    bar.classList.remove('bg-secondary');
+                    bar.classList.add('bg-success');
+                });
+            } else {
+                meterBars.forEach(bar => {
+                    bar.classList.remove('bg-secondary');
+                    bar.classList.add('bg-warning');
+                });
+            }
+
+            checkPasswordMatch();
+        });
+
+        confirmInput.addEventListener('input', checkPasswordMatch);
+    });
 </script>
 
 
