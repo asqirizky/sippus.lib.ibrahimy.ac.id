@@ -167,9 +167,8 @@ class WaNotifController extends Controller
         // hadir
         elseif ($pesanMasuk === 'hadir') {
 
-            $balasan = "*Presesi Kehadiran*\n\n"
-                . "Maaf, fitur presensi untuk sementara dinonaktifkan.\n"
-                . "Silakan hubungi admin untuk informasi lebih lanjut.";
+            $balasan = "*Presensi Kehadiran*\n\n"
+                . "Maaf, fitur presensi untuk sementara dinonaktifkan.";
         }
 
         // salam
@@ -223,8 +222,7 @@ class WaNotifController extends Controller
             ]);
 
             $balasan = "*Presensi Kehadiran*\n\n"
-                . "Maaf, fitur presensi untuk sementara dinonaktifkan.\n"
-                . "Silakan hubungi admin untuk informasi lebih lanjut.";
+                . "Maaf, fitur presensi untuk sementara dinonaktifkan.";
 
         } elseif ($pesanMasuk === 'izin') {
 
