@@ -10,7 +10,6 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\Master\JabatanController;
 use App\Http\Controllers\Master\JadwalController;
 use App\Http\Controllers\Master\LiburController;
-use App\Http\Controllers\Master\PendidikanPagiController;
 use App\Http\Controllers\Master\PustakawanController;
 use App\Http\Controllers\Master\RuangController;
 use App\Http\Controllers\Payroll\PayrollController;

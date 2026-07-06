@@ -167,8 +167,9 @@ class WaNotifController extends Controller
         // hadir
         elseif ($pesanMasuk === 'hadir') {
 
-            $balasan = "*Presensi Kehadiran*\n\n"
-                . "Silakan kirim lokasi Anda sekarang.";
+            $balasan = "*Presesi Kehadiran*\n\n"
+                . "Maaf, fitur presensi untuk sementara dinonaktifkan.\n"
+                . "Silakan hubungi admin untuk informasi lebih lanjut.";
         }
 
         // salam
@@ -187,7 +188,6 @@ class WaNotifController extends Controller
             }
 
             $balasan = "Selamat {$salam}\n\n"
-                . "Ketik *Hadir* untuk melakukan presensi.\n"
                 . "Ketik *Izin* untuk mengajukan izin.";
         }
 
@@ -213,196 +213,18 @@ class WaNotifController extends Controller
         }
 
         // =========================
-        // PRESENSI DENGAN LOKASI
+        // PRESENSI DENGAN LOKASI (Dinonaktifkan sementara)
         // =========================
         if ($request->location != null || str_contains($pesanMasuk, 'loc:')) {
 
-            $koordinat = $request->location ?? $pesanMasuk;
-
-            $userCoords = explode(',', $koordinat);
-
-            $userLat = trim($userCoords[0] ?? 0);
-            $userLong = trim($userCoords[1] ?? 0);
-
-            Log::info('KOORDINAT USER', [
-                'lat' => $userLat,
-                'long' => $userLong
+            Log::info('LOKASI DITERIMA TAPI PRESENSI SEDANG DINONAKTIFKAN', [
+                'pengirim' => $pengirim,
+                'lokasi' => $request->location,
             ]);
 
-            // =========================
-            // AMBIL SEMUA KOORDINAT
-            // =========================
-            $settings = Setting::all();
-
-            $bolehAbsen = false;
-            $jarakUser = 0;
-            $lokasiDipakai = null;
-
-            foreach ($settings as $setting) {
-
-                $centerLat = $setting->latitude;
-                $centerLong = $setting->longitude;
-                $maxRadius = $setting->radius ?? 100;
-
-                $jarak = $this->calculateDistance(
-                    $centerLat,
-                    $centerLong,
-                    $userLat,
-                    $userLong
-                );
-
-                Log::info('CEK LOKASI', [
-                    'lokasi' => $setting->lokasi,
-                    'jarak_meter' => $jarak,
-                    'radius' => $maxRadius
-                ]);
-
-                // Jika salah satu lokasi memenuhi radius
-                if ($jarak <= $maxRadius) {
-
-                    $bolehAbsen = true;
-                    $jarakUser = $jarak;
-                    $lokasiDipakai = $setting->lokasi;
-
-                    break;
-                }
-            }
-
-            // =========================
-            // VALIDASI RADIUS
-            // =========================
-            if (!$bolehAbsen) {
-
-                $balasan = "*Maaf Presensi Ditolak*\n"
-                    . "Anda berada di luar area presensi.";
-
-            } else {
-
-                try {
-
-                    $nomor = preg_replace('/[^0-9]/', '', $pengirim);
-
-                    // Ubah 62 menjadi 0
-                    if (str_starts_with($nomor, '62')) {
-                        $nomor = '0' . substr($nomor, 2);
-                    }
-
-                    $pustakawan = Pustakawan::whereRaw(
-                        "REPLACE(no_wa, ' ', '') LIKE ?",
-                        ['%' . substr($nomor, -10)]
-                    )->first();
-
-                    Log::info('DATA PUSTAKAWAN FULL', [
-                        'nomor_dicari' => $nomor,
-                        'pustakawan' => $pustakawan ? $pustakawan->toArray() : null,
-                    ]);
-
-                    if (!$pustakawan) {
-
-                        $balasan = "*Gagal Menyimpan Data*\n\n"
-                            . "Nomor WhatsApp Anda belum terdaftar.";
-
-                    } else {
-
-                        $jamSekarang = now()->format('H:i:s');
-
-                        $jadwal = Jadwal::whereTime('jamMasuk', '<=', $jamSekarang)
-                            ->whereTime('jamPulang', '>=', $jamSekarang)
-                            ->first();
-
-                        if (!$jadwal) {
-
-                            $balasan = "*Presensi Gagal!*\n"
-                                . "Sekarang bukan jam kantor.";
-
-                        } else {
-
-                            $hariMap = [
-                                'Sunday'    => 'Minggu',
-                                'Monday'    => 'Senin',
-                                'Tuesday'   => 'Selasa',
-                                'Wednesday' => 'Rabu',
-                                'Thursday'  => 'Kamis',
-                                'Friday'    => 'Jumat',
-                                'Saturday'  => 'Sabtu',
-                            ];
-
-                            $hari = $hariMap[now()->format('l')];
-
-                            $jadwalPustakawan = DB::table('pustakawan_jadwal')
-                                ->where('pustakawan_id', $pustakawan->id)
-                                ->where('hari', $hari)
-                                ->first();
-
-                            if (!$jadwalPustakawan) {
-
-                                $balasan = "*Presensi Gagal!*\n"
-                                    . "Anda tidak memiliki jadwal pada hari {$hari}.";
-
-                            } else {
-
-                                $shift = $jadwal->jadwal;
-                                $kolomShift = strtolower($shift);
-
-                                if (
-                                    !isset($jadwalPustakawan->$kolomShift) ||
-                                    $jadwalPustakawan->$kolomShift != 1
-                                ) {
-                                    $balasan = "*Presensi Gagal!*\n"
-                                    . "Anda tidak memiliki shift {$shift} pada hari {$hari}.";
-                                } else {
-                                    $sudahAbsen = AbsenStruktural::where('pustakawan_id', $pustakawan->id)
-                                        ->whereDate('tanggal', today())
-                                        ->whereHas('jadwal', function ($q) use ($shift) {
-                                            $q->where('jadwal', $shift);
-                                        })
-                                        ->exists();
-
-                                    if ($sudahAbsen) {
-
-                                        $balasan = "*Tidak perlu absen dua kali.*\n"
-                                        . "Anda sudah melakukan presensi shift {$shift} hari ini.";
-
-                                    } else {
-
-                                        AbsenStruktural::create([
-                                            'pustakawan_id' => $pustakawan->id,
-                                            'jadwal_id' => $jadwal->id,
-                                            'tanggal' => now()->toDateString(),
-                                            'jam_masuk' => now()->format('H:i:s'),
-                                            'keterangan' => 'Hadir',
-                                        ]);
-
-                                        Log::info('ABSEN BERHASIL', [
-                                            'nama_pustakawan' => $pustakawan->nama_pustakawan,
-                                            'shift' => $shift,
-                                        ]);
-
-                                        $balasan = "*Presensi Berhasil!*\n\n"
-                                            . "Nama: {$pustakawan->nama_pustakawan}\n"
-                                            . "Shift: {$shift}\n"
-                                            . "Tanggal: " . now()->format('d-m-Y') . "\n"
-                                            . "Jam: " . now()->format('H:i') . "\n"
-                                            . "Jarak: " . round($jarakUser) . " meter\n\n"
-                                            . "Terima kasih sudah melakukan absensi hari ini."
-                                            . " Semoga seluruh urusan Anda diberi kelancaraan oleh Allah Subhanahu Wata'ala";
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                } catch (\Exception $e) {
-
-                    Log::error('GAGAL ABSEN', [
-                        'message' => $e->getMessage(),
-                        'line' => $e->getLine(),
-                    ]);
-
-                    $balasan = "*Presensi Gagal!*\n\n"
-                        . "Terjadi kesalahan sistem.";
-                }
-            }
+            $balasan = "*Presensi Kehadiran*\n\n"
+                . "Maaf, fitur presensi untuk sementara dinonaktifkan.\n"
+                . "Silakan hubungi admin untuk informasi lebih lanjut.";
 
         } elseif ($pesanMasuk === 'izin') {
 

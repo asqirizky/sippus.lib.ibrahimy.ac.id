@@ -81,9 +81,6 @@
                     </div>
                     <!--end::Wrapper-->
                     <!--begin::Hint-->
-                    {{-- <div class="text-muted">
-                        Gunakan 8 karakter atau lebih dengan campuran huruf, angka atau simbol.
-                    </div> --}}
                     <div id="password-message" class="text-danger fs-7 mt-2" style="display: none;">Password minimal 8 karakter</div>
                     <!--end::Hint-->
                 </div>
