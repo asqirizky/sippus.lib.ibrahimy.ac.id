@@ -727,16 +727,18 @@ class AbsenController extends Controller
         imagedestroy($master);
 
         $distance = $this->hammingDistance($hash1, $hash2);
+        $maxBits = strlen($hash1);
+        $similarity = round((1 - $distance / $maxBits) * 100);
 
-        Log::info('Foto absen - jarak hamming: ' . $distance . ' (NIK: ' . request('nik') . ')');
+        Log::info("Foto absen - jarak hamming: {$distance}/{$maxBits} ({$similarity}%) NIK: " . request('nik'));
 
-        return $distance <= 25;
+        return $distance <= 90;
     }
 
     private function perceptualHash($image)
     {
-        $width = 8;
-        $height = 8;
+        $width = 16;
+        $height = 16;
 
         $resized = imagecreatetruecolor($width, $height);
         imagecopyresampled($resized, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
@@ -750,16 +752,27 @@ class AbsenController extends Controller
             }
         }
 
-        $avg = array_sum($pixels) / count($pixels);
+        imagedestroy($resized);
+
+        $median = $this->medianValue($pixels);
 
         $hash = '';
         foreach ($pixels as $pixel) {
-            $hash .= $pixel >= $avg ? '1' : '0';
+            $hash .= $pixel >= $median ? '1' : '0';
         }
 
-        imagedestroy($resized);
-
         return $hash;
+    }
+
+    private function medianValue($array)
+    {
+        sort($array);
+        $count = count($array);
+        $mid = floor($count / 2);
+        if ($count % 2 == 0) {
+            return ($array[$mid - 1] + $array[$mid]) / 2;
+        }
+        return $array[$mid];
     }
 
     private function hammingDistance($hash1, $hash2)
