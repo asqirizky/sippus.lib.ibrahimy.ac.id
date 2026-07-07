@@ -24,3 +24,5 @@ Artisan::command('inspire', function () {
 //     ->days([5, 6, 0, 1, 2, 3])
 //     ->dailyAt('21:30');
 
+Schedule::command('absen:bersihkan-foto')->daily();
+

@@ -57,10 +57,6 @@ class AbsenController extends Controller
             return back()->with('error', 'Nomor id anda tidak terdeteksi di ruang ini');
         }
 
-        if (!$pustakawan->foto) {
-            return back()->with('error', 'Foto master pustakawan belum tersedia, hubungi admin');
-        }
-
         // Geofencing check — cocokkan dengan semua titik yang dikonfigurasi
         $settings = Setting::all();
         $locationValid = $settings->isEmpty();
@@ -88,12 +84,6 @@ class AbsenController extends Controller
                 $msg .= ' (jarak ' . $nearestDist . ' m)';
             }
             return back()->with('error', $msg);
-        }
-
-        // Photo verification
-        $verified = $this->verifyPhoto($request->foto, $pustakawan->foto);
-        if (!$verified) {
-            return back()->with('error', 'Foto tidak sesuai dengan data master');
         }
 
         $now = \Carbon\Carbon::now();
