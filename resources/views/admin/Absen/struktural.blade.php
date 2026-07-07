@@ -138,14 +138,14 @@
           Ganti Kamera
         </button>
       </div>
-      <input type="hidden" name="foto" id="foto-input" />
-      <input type="hidden" name="latitude" id="latitude-input" />
-      <input type="hidden" name="longitude" id="longitude-input" />
     </div>
 
     <!-- Form -->
     <form class="form" method="POST" action="{{ route('struktural-proses') }}" id="absen-form">
       @csrf
+      <input type="hidden" name="foto" id="foto-input" />
+      <input type="hidden" name="latitude" id="latitude-input" />
+      <input type="hidden" name="longitude" id="longitude-input" />
       <div>
         <input type="text" name="nik" inputmode="numeric" pattern="[0-9]*" placeholder="Masukkan NIK" required
           class="w-full px-4 py-3 text-base text-center rounded-xl bg-white/90 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:animate-[pulseGlow_0.6s_ease]" autofocus/>
