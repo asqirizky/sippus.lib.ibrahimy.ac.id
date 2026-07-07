@@ -8,12 +8,14 @@ use App\Models\Absen\AbsenStruktural;
 use App\Models\Absen\AbsenViar;
 use App\Models\Master\Jadwal;
 use App\Models\Master\Pustakawan;
+use App\Models\Setting;
 use App\Models\Struktural\IzinStruktural;
 use App\Services\FonnteService;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AbsenController extends Controller
 {
@@ -24,14 +26,19 @@ class AbsenController extends Controller
 
     public function struktural() {
 
-        return view('admin.Absen.struktural');
+        $settings = Setting::all();
+
+        return view('admin.Absen.struktural', compact('settings'));
     }
 
 
     public function absen_struktural(Request $request)
     {
         $request->validate([
-            'nik' => 'required'
+            'nik'       => 'required',
+            'latitude'  => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'foto'      => 'required|string',
         ]);
 
         $pustakawan = Pustakawan::with('jabatan')
@@ -48,6 +55,45 @@ class AbsenController extends Controller
 
         if ($pustakawan->jabatan && strtolower($pustakawan->jabatan->nama_jabatan) == 'tenaga khidmah') {
             return back()->with('error', 'Nomor id anda tidak terdeteksi di ruang ini');
+        }
+
+        if (!$pustakawan->foto) {
+            return back()->with('error', 'Foto master pustakawan belum tersedia, hubungi admin');
+        }
+
+        // Geofencing check — cocokkan dengan semua titik yang dikonfigurasi
+        $settings = Setting::all();
+        $locationValid = $settings->isEmpty();
+        $nearestDist = null;
+        foreach ($settings as $s) {
+            if ($s->latitude && $s->longitude && $s->radius) {
+                $distance = $this->calculateDistance(
+                    $s->latitude,
+                    $s->longitude,
+                    $request->latitude,
+                    $request->longitude
+                );
+                if ($distance <= $s->radius) {
+                    $locationValid = true;
+                    break;
+                }
+                if ($nearestDist === null || $distance < $nearestDist) {
+                    $nearestDist = round($distance);
+                }
+            }
+        }
+        if (!$locationValid) {
+            $msg = 'Anda berada di luar area absensi';
+            if ($nearestDist !== null) {
+                $msg .= ' (jarak ' . $nearestDist . ' m)';
+            }
+            return back()->with('error', $msg);
+        }
+
+        // Photo verification
+        $verified = $this->verifyPhoto($request->foto, $pustakawan->foto);
+        if (!$verified) {
+            return back()->with('error', 'Foto tidak sesuai dengan data master');
         }
 
         $now = \Carbon\Carbon::now();
@@ -95,12 +141,17 @@ class AbsenController extends Controller
             return back()->with('error', 'Sudah absen pada jadwal_id ini');
         }
 
+        // Save captured photo
+        $fotoName = $this->saveCapturedPhoto($request->foto);
+
         AbsenStruktural::create([
             'pustakawan_id' => $pustakawan->id,
             'jadwal_id'     => $jadwal->id,
             'tanggal'       => $tanggal,
             'jam_masuk'     => $jam,
-            'keterangan'    => 'Hadir'
+            'keterangan'    => 'Hadir',
+            'foto'          => $fotoName,
+            'koordinat'     => $request->latitude . ',' . $request->longitude,
         ]);
 
         return back()->with('success', 'Terima kasih anda telah absen hari ini');
@@ -613,5 +664,134 @@ class AbsenController extends Controller
         ]);
 
         return back()->with('success', 'Terima kasih sudah absen hari ini');
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371000;
+
+        $latFrom = deg2rad($lat1);
+        $lonFrom = deg2rad($lon1);
+
+        $latTo = deg2rad($lat2);
+        $lonTo = deg2rad($lon2);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(
+            pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) *
+            pow(sin($lonDelta / 2), 2)
+        ));
+
+        return $angle * $earthRadius;
+    }
+
+    private function verifyPhoto($capturedBase64, $masterPhotoFilename)
+    {
+        if (!function_exists('imagecreatefromstring')) {
+            Log::warning('GD library tidak tersedia, foto tidak diverifikasi');
+            return true;
+        }
+
+        $masterPath = public_path('admin/assets/media/' . $masterPhotoFilename);
+        if (!file_exists($masterPath)) {
+            Log::warning('Foto master tidak ditemukan: ' . $masterPhotoFilename);
+            return false;
+        }
+
+        if (strpos($capturedBase64, ',') !== false) {
+            $capturedBase64 = substr($capturedBase64, strpos($capturedBase64, ',') + 1);
+        }
+
+        $capturedData = base64_decode($capturedBase64);
+        if (!$capturedData) {
+            return false;
+        }
+
+        $captured = @imagecreatefromstring($capturedData);
+        if (!$captured) {
+            return false;
+        }
+
+        $masterData = file_get_contents($masterPath);
+        $master = @imagecreatefromstring($masterData);
+        if (!$master) {
+            imagedestroy($captured);
+            return false;
+        }
+
+        $hash1 = $this->perceptualHash($captured);
+        $hash2 = $this->perceptualHash($master);
+
+        imagedestroy($captured);
+        imagedestroy($master);
+
+        $distance = $this->hammingDistance($hash1, $hash2);
+
+        Log::info('Foto absen - jarak hamming: ' . $distance . ' (NIK: ' . request('nik') . ')');
+
+        return $distance <= 25;
+    }
+
+    private function perceptualHash($image)
+    {
+        $width = 8;
+        $height = 8;
+
+        $resized = imagecreatetruecolor($width, $height);
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
+
+        $pixels = [];
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
+                $rgb = imagecolorat($resized, $x, $y);
+                $gray = ($rgb >> 16 & 0xFF) * 0.299 + ($rgb >> 8 & 0xFF) * 0.587 + ($rgb & 0xFF) * 0.114;
+                $pixels[] = $gray;
+            }
+        }
+
+        $avg = array_sum($pixels) / count($pixels);
+
+        $hash = '';
+        foreach ($pixels as $pixel) {
+            $hash .= $pixel >= $avg ? '1' : '0';
+        }
+
+        imagedestroy($resized);
+
+        return $hash;
+    }
+
+    private function hammingDistance($hash1, $hash2)
+    {
+        $distance = 0;
+        $len = strlen($hash1);
+        for ($i = 0; $i < $len; $i++) {
+            if ($hash1[$i] !== $hash2[$i]) {
+                $distance++;
+            }
+        }
+        return $distance;
+    }
+
+    private function saveCapturedPhoto($base64Data)
+    {
+        if (strpos($base64Data, ',') !== false) {
+            $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
+        }
+
+        $imageData = base64_decode($base64Data);
+        if (!$imageData) {
+            return null;
+        }
+
+        $fileName = 'absen_' . time() . '_' . uniqid() . '.jpg';
+        $filePath = public_path('admin/assets/media/' . $fileName);
+
+        file_put_contents($filePath, $imageData);
+
+        return $fileName;
     }
 }
