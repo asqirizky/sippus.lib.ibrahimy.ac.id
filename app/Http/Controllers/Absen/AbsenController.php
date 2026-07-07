@@ -688,11 +688,6 @@ class AbsenController extends Controller
 
     private function verifyPhoto($capturedBase64, $masterPhotoFilename)
     {
-        if (!function_exists('imagecreatefromstring')) {
-            Log::warning('GD library tidak tersedia, foto tidak diverifikasi');
-            return true;
-        }
-
         $masterPath = public_path('admin/assets/media/' . $masterPhotoFilename);
         if (!file_exists($masterPath)) {
             Log::warning('Foto master tidak ditemukan: ' . $masterPhotoFilename);
@@ -708,83 +703,54 @@ class AbsenController extends Controller
             return false;
         }
 
-        $captured = @imagecreatefromstring($capturedData);
-        if (!$captured) {
-            return false;
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0775, true);
         }
 
-        $masterData = file_get_contents($masterPath);
-        $master = @imagecreatefromstring($masterData);
-        if (!$master) {
-            imagedestroy($captured);
-            return false;
+        $capturedPath = $tempDir . '/captured_' . uniqid() . '.jpg';
+        $masterTempPath = $tempDir . '/master_' . uniqid() . '.jpg';
+
+        file_put_contents($capturedPath, $capturedData);
+        copy($masterPath, $masterTempPath);
+
+        $capturedProc = $tempDir . '/captured_proc_' . uniqid() . '.jpg';
+        $masterProc = $tempDir . '/master_proc_' . uniqid() . '.jpg';
+
+        $cmd1 = "magick " . escapeshellarg($capturedPath)
+            . " -gravity center -crop 50x50%+0+0 -colorspace gray -resize 256x256! "
+            . escapeshellarg($capturedProc) . " 2>/dev/null";
+
+        $cmd2 = "magick " . escapeshellarg($masterTempPath)
+            . " -gravity center -crop 50x50%+0+0 -colorspace gray -resize 256x256! "
+            . escapeshellarg($masterProc) . " 2>/dev/null";
+
+        $cmdCompare = "compare -metric phash " . escapeshellarg($capturedProc)
+            . " " . escapeshellarg($masterProc) . " /dev/null 2>&1";
+
+        exec($cmd1);
+        exec($cmd2);
+
+        $distance = null;
+        exec($cmdCompare, $output, $exitCode);
+
+        if (isset($output[0]) && is_numeric(trim($output[0]))) {
+            $distance = (float) trim($output[0]);
         }
 
-        $hash1 = $this->perceptualHash($captured);
-        $hash2 = $this->perceptualHash($master);
+        @unlink($capturedPath);
+        @unlink($masterTempPath);
+        @unlink($capturedProc);
+        @unlink($masterProc);
 
-        imagedestroy($captured);
-        imagedestroy($master);
-
-        $distance = $this->hammingDistance($hash1, $hash2);
-        $maxBits = strlen($hash1);
-        $similarity = round((1 - $distance / $maxBits) * 100);
-
-        Log::info("Foto absen - jarak hamming: {$distance}/{$maxBits} ({$similarity}%) NIK: " . request('nik'));
-
-        return $distance <= 90;
-    }
-
-    private function perceptualHash($image)
-    {
-        $width = 16;
-        $height = 16;
-
-        $resized = imagecreatetruecolor($width, $height);
-        imagecopyresampled($resized, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
-
-        $pixels = [];
-        for ($y = 0; $y < $height; $y++) {
-            for ($x = 0; $x < $width; $x++) {
-                $rgb = imagecolorat($resized, $x, $y);
-                $gray = ($rgb >> 16 & 0xFF) * 0.299 + ($rgb >> 8 & 0xFF) * 0.587 + ($rgb & 0xFF) * 0.114;
-                $pixels[] = $gray;
-            }
+        if ($distance === null) {
+            Log::warning('Foto absen - gagal menjalankan ImageMagick');
+            return true;
         }
 
-        imagedestroy($resized);
+        Log::info("Foto absen - phash distance: {$distance} NIK: " . request('nik'));
 
-        $median = $this->medianValue($pixels);
-
-        $hash = '';
-        foreach ($pixels as $pixel) {
-            $hash .= $pixel >= $median ? '1' : '0';
-        }
-
-        return $hash;
-    }
-
-    private function medianValue($array)
-    {
-        sort($array);
-        $count = count($array);
-        $mid = floor($count / 2);
-        if ($count % 2 == 0) {
-            return ($array[$mid - 1] + $array[$mid]) / 2;
-        }
-        return $array[$mid];
-    }
-
-    private function hammingDistance($hash1, $hash2)
-    {
-        $distance = 0;
-        $len = strlen($hash1);
-        for ($i = 0; $i < $len; $i++) {
-            if ($hash1[$i] !== $hash2[$i]) {
-                $distance++;
-            }
-        }
-        return $distance;
+        return $distance <= 120;
     }
 
     private function saveCapturedPhoto($base64Data)
