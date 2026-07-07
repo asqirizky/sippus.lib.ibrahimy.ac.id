@@ -2,11 +2,22 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Absensi Pustakawan Struktural - Perpustakaan Ibrahimy</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
     body {
       background-size: cover;
       background-position: center;
@@ -14,57 +25,45 @@
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(40px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(40px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     @keyframes pulseGlow {
-      0% { box-shadow: 0 0 0px rgba(59,130,246,0.0); }
-      50% { box-shadow: 0 0 12px rgba(59,130,246,0.5); }
+      0%   { box-shadow: 0 0 0px rgba(59,130,246,0.0); }
+      50%  { box-shadow: 0 0 12px rgba(59,130,246,0.5); }
       100% { box-shadow: 0 0 0px rgba(59,130,246,0.0); }
-    }
-
-    @keyframes bgMove {
-      0% { background-position: center top; }
-      100% { background-position: center bottom; }
     }
 
     .animate-card {
       animation: fadeInUp 0.8s ease;
     }
 
-    body {
-      animation: bgMove 10s ease-in-out infinite alternate;
-    }
-
     #camera-preview {
       width: 100%;
-      max-height: 240px;
+      aspect-ratio: 4 / 3;
+      max-height: 55vh;
       object-fit: cover;
       border-radius: 0.75rem;
-      transform: scaleX(-1);
+      background: #000;
     }
 
     #captured-photo {
       width: 100%;
-      max-height: 240px;
+      aspect-ratio: 4 / 3;
+      max-height: 55vh;
       object-fit: contain;
       border-radius: 0.75rem;
+      background: #000;
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.375rem;
-      padding: 0.25rem 0.75rem;
+      padding: 0.35rem 0.85rem;
       border-radius: 9999px;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 600;
     }
 
@@ -73,58 +72,72 @@
       height: 0.5rem;
       border-radius: 9999px;
     }
+
+    @media (max-width: 640px) {
+      .status-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.7rem;
+      }
+      #camera-preview, #captured-photo {
+        max-height: 45vh;
+      }
+    }
   </style>
 </head>
 
-<body class="relative flex items-center justify-center min-h-screen">
-
-  <!-- Overlay -->
-  <div class="absolute inset-0 backdrop-blur-sm" style="background-color: #22a953"></div>
+<body class="relative flex items-center justify-center min-h-screen" style="background: #22a953;">
 
   <!-- Form Card -->
-  <div class="relative z-10 w-full max-w-md p-6 text-center shadow-2xl bg-white/10 backdrop-blur-md rounded-2xl animate-card">
+  <div class="relative z-10 w-full max-w-md p-5 sm:p-6 mx-3 text-center shadow-2xl bg-white/10 backdrop-blur-md rounded-2xl animate-card" style="max-height: 98vh; overflow-y: auto;">
 
     <!-- Logo -->
-    <h1 class="flex items-center justify-center gap-2 mb-4 text-3xl font-bold text-white">
-      <span class="px-2 py-1 text-blue-700 bg-white rounded">lib</span>
+    <h1 class="flex items-center justify-center gap-2 mb-3 text-2xl sm:text-3xl font-bold text-white">
+      <span class="px-2 py-1 text-blue-700 bg-white rounded text-xl sm:text-2xl">lib</span>
       <span>Ibrahimy</span>
     </h1>
 
     <!-- Status Geofencing -->
-    <div id="geo-status" class="mb-4">
+    <div id="geo-status" class="mb-3">
       <span class="status-badge bg-gray-500/50 text-white">
         <span class="dot bg-gray-300"></span>
         Memeriksa lokasi...
       </span>
     </div>
     <button type="button" id="btn-retry-geo"
-      class="hidden text-xs text-white/80 underline hover:text-white mb-2"
+      class="hidden text-xs text-white/80 underline hover:text-white mb-2 py-1"
       onclick="retryGeolocation()">
       Coba lagi
     </button>
     <!-- Manual coordinate input (hidden, shown as last resort) -->
     <div id="manual-geo" class="hidden mb-3 space-y-2">
       <input type="text" id="manual-lat" placeholder="Latitude (cth: -7.7510)"
-        class="w-full px-3 py-2 text-sm text-center rounded-lg bg-white/90 focus:outline-none">
+        class="w-full px-3 py-2.5 text-sm text-center rounded-lg bg-white/90 focus:outline-none">
       <input type="text" id="manual-lng" placeholder="Longitude (cth: 114.2737)"
-        class="w-full px-3 py-2 text-sm text-center rounded-lg bg-white/90 focus:outline-none">
+        class="w-full px-3 py-2.5 text-sm text-center rounded-lg bg-white/90 focus:outline-none">
       <button type="button" id="btn-use-manual"
-        class="px-4 py-1.5 text-sm font-semibold text-blue-700 bg-white rounded-lg hover:bg-blue-100 transition">
+        class="w-full px-4 py-2.5 text-sm font-semibold text-blue-700 bg-white rounded-lg hover:bg-blue-100 transition active:scale-95">
         Gunakan Koordinat Manual
       </button>
     </div>
 
     <!-- Camera Section -->
-    <div id="camera-section" class="mb-4">
-      <video id="camera-preview" autoplay playsinline class="bg-black/30 mb-2"></video>
-      <div id="camera-controls" class="flex justify-center gap-2">
+    <div id="camera-section" class="mb-3">
+      <div class="relative overflow-hidden rounded-xl bg-black/30" style="aspect-ratio: 4/3;">
+        <video id="camera-preview" autoplay playsinline muted class="absolute inset-0 w-full h-full"></video>
+        <img id="captured-photo" class="absolute inset-0 w-full h-full hidden" />
+      </div>
+      <div id="camera-controls" class="flex flex-wrap justify-center gap-2 mt-2">
         <button type="button" id="btn-capture"
-          class="px-4 py-1.5 text-sm font-semibold text-blue-700 bg-white rounded-lg hover:bg-blue-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-2.5 text-sm sm:text-base font-semibold text-blue-700 bg-white rounded-xl hover:bg-blue-100 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           disabled>
           Ambil Foto
         </button>
+        <button type="button" id="btn-switch-camera"
+          class="px-4 py-2.5 text-sm font-semibold text-white bg-white/20 rounded-xl hover:bg-white/30 transition active:scale-95 shadow-lg hidden"
+          onclick="switchCamera()">
+          Ganti Kamera
+        </button>
       </div>
-      <img id="captured-photo" class="hidden mt-2" />
       <input type="hidden" name="foto" id="foto-input" />
       <input type="hidden" name="latitude" id="latitude-input" />
       <input type="hidden" name="longitude" id="longitude-input" />
@@ -134,13 +147,13 @@
     <form class="form" method="POST" action="{{ route('struktural-proses') }}" id="absen-form">
       @csrf
       <div>
-        <input type="text" name="nik" placeholder="Masukkan NIK" required
-          class="w-full px-4 py-3 text-center rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:animate-[pulseGlow_0.6s_ease]" autofocus/>
+        <input type="text" name="nik" inputmode="numeric" pattern="[0-9]*" placeholder="Masukkan NIK" required
+          class="w-full px-4 py-3 text-base text-center rounded-xl bg-white/90 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:animate-[pulseGlow_0.6s_ease]" autofocus/>
       </div>
 
-      <div class="flex justify-center mt-4">
+      <div class="flex justify-center mt-3">
         <button type="submit" id="btn-submit"
-          class="px-6 py-2 font-semibold text-blue-700 transition duration-300 bg-white rounded-lg hover:bg-blue-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full sm:w-auto px-8 py-3 text-base font-semibold text-blue-700 transition duration-300 bg-white rounded-xl hover:bg-blue-100 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
           disabled>
           Submit
         </button>
@@ -148,7 +161,7 @@
     </form>
 
     <!-- Footer -->
-    <p class="mt-6 text-xs text-white/80">
+    <p class="mt-4 text-xs text-white/80">
       &copy;2026 AsqiRizky-Librarian Developer
     </p>
   </div>
@@ -336,19 +349,80 @@
     }
 
     // ========== CAMERA ==========
-    async function startCamera() {
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    let cameraStarted = false;
+    let currentFacing = 'environment'; // 'user' = depan, 'environment' = belakang
+
+    async function startCamera(facing) {
+      if (cameraStarted && facing === undefined) return;
+      if (facing) currentFacing = facing;
+
+      // Stop existing stream before switching
+      stopCamera();
+      cameraStarted = false;
+
       try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        const constraints = {
+          audio: false,
+          video: { facingMode: currentFacing, width: { ideal: 720 }, height: { ideal: 960 } }
+        };
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = cameraStream;
+        cameraStarted = true;
         btnCapture.disabled = false;
-      } catch {
-        Swal.fire({
-          title: 'Kamera tidak tersedia',
-          text: 'Akses kamera diperlukan untuk absen. Izinkan akses kamera dan reload halaman.',
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#dc2626'
-        });
+        document.getElementById('btn-start-camera')?.remove();
+        updateCameraUI();
+      } catch (err) {
+        if (err.name === 'OverconstrainedError' || err.name === 'NotFoundError') {
+          try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+            video.srcObject = cameraStream;
+            cameraStarted = true;
+            btnCapture.disabled = false;
+            document.getElementById('btn-start-camera')?.remove();
+            updateCameraUI();
+            return;
+          } catch (_) {}
+        }
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          Swal.fire({
+            title: 'Akses kamera ditolak',
+            text: 'Izinkan akses kamera di pengaturan browser, lalu reload halaman.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#dc2626'
+          });
+        } else {
+          if (!document.getElementById('btn-start-camera')) {
+            const btn = document.createElement('button');
+            btn.id = 'btn-start-camera';
+            btn.type = 'button';
+            btn.className = 'w-full px-4 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg';
+            btn.textContent = 'Mulai Kamera';
+            btn.onclick = function (e) {
+              e.preventDefault();
+              startCamera();
+            };
+            document.getElementById('camera-controls').prepend(btn);
+          }
+        }
+      }
+    }
+
+    function switchCamera() {
+      currentFacing = currentFacing === 'user' ? 'environment' : 'user';
+      startCamera(currentFacing);
+    }
+
+    function updateCameraUI() {
+      const isFront = currentFacing === 'user';
+      video.style.transform = isFront ? 'scaleX(-1)' : 'scaleX(1)';
+      const btnSwitch = document.getElementById('btn-switch-camera');
+      if (btnSwitch) {
+        btnSwitch.textContent = isFront ? 'Kamera Belakang' : 'Kamera Depan';
       }
     }
 
@@ -360,13 +434,19 @@
     }
 
     btnCapture.addEventListener('click', function () {
+      const w = video.videoWidth || 640;
+      const h = video.videoHeight || 480;
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext('2d');
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Mirror only front camera
+      const isFront = currentFacing === 'user';
+      if (isFront) {
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0, w, h);
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
       fotoInput.value = dataUrl;
@@ -415,8 +495,31 @@
       btnSubmit.textContent = 'Memproses...';
     });
 
-    // Start camera on load
-    startCamera();
+    // Show switch camera button after camera starts
+    function onCameraStarted() {
+      const btnSwitch = document.getElementById('btn-switch-camera');
+      if (btnSwitch) btnSwitch.classList.remove('hidden');
+    }
+
+    // Start camera on load (on desktop it works immediately, on mobile requires user gesture)
+    if (isMobile()) {
+      currentFacing = 'environment';
+      const btn = document.createElement('button');
+      btn.id = 'btn-start-camera';
+      btn.type = 'button';
+      btn.className = 'w-full px-4 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg';
+      btn.textContent = 'Mulai Kamera';
+      btn.onclick = function (e) {
+        e.preventDefault();
+        startCamera(currentFacing);
+        onCameraStarted();
+      };
+      document.getElementById('camera-controls').prepend(btn);
+    } else {
+      currentFacing = 'user';
+      startCamera('user');
+      onCameraStarted();
+    }
 
     // Cleanup on page unload
     window.addEventListener('beforeunload', function () {
