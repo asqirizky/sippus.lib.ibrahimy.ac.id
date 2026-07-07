@@ -131,6 +131,14 @@ class AbsenController extends Controller
             return back()->with('error', 'Sudah absen pada jadwal_id ini');
         }
 
+        // Verifikasi foto cocok dengan foto master pustakawan
+        if (!empty($pustakawan->foto)) {
+            $verified = $this->verifyPhoto($request->foto, $pustakawan->foto);
+            if (!$verified) {
+                return back()->with('error', 'Foto tidak sesuai dengan data pustakawan');
+            }
+        }
+
         // Save captured photo
         $fotoName = $this->saveCapturedPhoto($request->foto);
 

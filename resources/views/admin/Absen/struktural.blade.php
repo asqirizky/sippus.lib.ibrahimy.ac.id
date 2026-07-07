@@ -97,17 +97,23 @@
     </h1>
 
     <!-- Status Geofencing -->
-    <div id="geo-status" class="mb-3">
+    <div id="geo-status" class="mb-2">
       <span class="status-badge bg-gray-500/50 text-white">
         <span class="dot bg-gray-300"></span>
         Memeriksa lokasi...
       </span>
     </div>
-    <button type="button" id="btn-retry-geo"
-      class="hidden text-xs text-white/80 underline hover:text-white mb-2 py-1"
-      onclick="retryGeolocation()">
-      Coba lagi
-    </button>
+    <div class="flex justify-center gap-2 mb-2">
+      <button type="button" id="btn-cek-lokasi"
+        class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+        Cek Lokasi
+      </button>
+      <button type="button" id="btn-retry-geo"
+        class="hidden px-3 py-2 text-xs font-semibold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition active:scale-95"
+        onclick="retryGeolocation()">
+        Coba lagi GPS
+      </button>
+    </div>
     <!-- Manual coordinate input (hidden, shown as last resort) -->
     <div id="manual-geo" class="hidden mb-3 space-y-2">
       <input type="text" id="manual-lat" placeholder="Latitude (cth: -7.7510)"
@@ -254,6 +260,9 @@
     const btnUseManual = document.getElementById('btn-use-manual');
 
     function onLocationReceived(userLat, userLng) {
+      const btnCek = document.getElementById('btn-cek-lokasi');
+      btnCek.disabled = false;
+      btnCek.textContent = 'Cek Lokasi';
       btnRetryGeo.classList.add('hidden');
       manualGeo.classList.add('hidden');
       latInput.value = userLat;
@@ -274,8 +283,15 @@
       updateSubmitButton();
     }
 
+    function resetCekLokasiBtn() {
+      const btn = document.getElementById('btn-cek-lokasi');
+      btn.disabled = false;
+      btn.textContent = 'Cek Lokasi';
+    }
+
     function tryBrowserGeo(highAccuracy) {
       if (!navigator.geolocation) {
+        resetCekLokasiBtn();
         return false;
       }
       setGeoStatus('Memeriksa lokasi...', '#94a3b8', '#94a3b8');
@@ -287,6 +303,7 @@
           if (err && err.code === 1) {
             setGeoStatus('Akses lokasi ditolak', '#ef4444', '#ef4444');
             btnRetryGeo.classList.remove('hidden');
+            resetCekLokasiBtn();
             return;
           }
           if (highAccuracy) {
@@ -318,6 +335,7 @@
     }
 
     function showManualInput() {
+      resetCekLokasiBtn();
       setGeoStatus('Masukkan koordinat manual', '#f59e0b', '#f59e0b');
       manualGeo.classList.remove('hidden');
     }
@@ -327,6 +345,25 @@
       manualGeo.classList.add('hidden');
       tryBrowserGeo(true);
     }
+
+    function checkLocation() {
+      const btn = document.getElementById('btn-cek-lokasi');
+      btn.disabled = true;
+      btn.textContent = 'Mengecek...';
+      geoVerified = false;
+      updateSubmitButton();
+      btnRetryGeo.classList.add('hidden');
+      manualGeo.classList.add('hidden');
+      tryBrowserGeo(true);
+      setTimeout(function () {
+        resetCekLokasiBtn();
+      }, 5000);
+    }
+
+    document.getElementById('btn-cek-lokasi').addEventListener('click', function (e) {
+      e.preventDefault();
+      checkLocation();
+    });
 
     btnUseManual.addEventListener('click', function () {
       const lat = parseFloat(manualLat.value);
