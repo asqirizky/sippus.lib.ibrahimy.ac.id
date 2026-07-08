@@ -24,15 +24,98 @@ class AbsenController extends Controller
         return view('admin.Absen.absen_room');
     }
 
-    public function struktural() {
+    public function face_recognition() {
 
         $settings = Setting::all();
 
-        return view('admin.Absen.struktural', compact('settings'));
+        return view('admin.Absen.face_recognition', compact('settings'));
+    }
+
+    public function absen_struktural() {
+        return view('admin.Absen.absen_struktural');
+    }
+
+    public function absen_struktural_proses(Request $request)
+    {
+        $request->validate([
+            'nik' => 'required'
+        ]);
+
+        $pustakawan = Pustakawan::with('jabatan')
+            ->where('nik', $request->nik)
+            ->first();
+
+        if (!$pustakawan) {
+            return back()->with('error', 'NIK tidak ditemukan');
+        }
+
+        $nama = $pustakawan->nama_pustakawan;
+
+        if ($pustakawan->status == 0) {
+            return back()->with('error', "Maaf {$nama}, nomor ID Anda berstatus tidak aktif / tidak terdaftar.");
+        }
+
+        if ($pustakawan->jabatan && strtolower($pustakawan->jabatan->nama_jabatan) == 'tenaga khidmah') {
+            return back()->with('error', "Maaf {$nama}, Nomor id anda tidak terdeteksi di ruang ini");
+        }
+
+        $now = \Carbon\Carbon::now();
+        $tanggal = $now->toDateString();
+        $jam = $now->format('H:i:s');
+
+        $jadwal = Jadwal::where('jamMasuk', '<=', $jam)
+            ->where('jamPulang', '>=', $jam)
+            ->first();
+
+        if (!$jadwal) {
+            return back()->with('error', "Hi! {$nama}, Tidak ada jadwal aktif saat ini");
+        }
+
+        $hari = $now->locale('id')->translatedFormat('l');
+
+        $jadwalPustakawan = DB::table('pustakawan_jadwal')
+            ->where('pustakawan_id', $pustakawan->id)
+            ->where('hari', $hari)
+            ->first();
+
+        if (!$jadwalPustakawan) {
+            return back()->with('error', 'Tidak ada jadwal di hari ini');
+        }
+
+        $shiftMap = [
+            'Pagi'  => 'pagi',
+            'Siang' => 'siang',
+            'Malam' => 'malam',
+        ];
+
+        $shiftAktif = $shiftMap[$jadwal->jadwal] ?? null;
+
+        if ($shiftAktif && $jadwalPustakawan->$shiftAktif == 0) {
+            return back()->with('error', "{$nama} tidak memiliki jadwal pada shift ini");
+        }
+
+        $cek = AbsenStruktural::where('pustakawan_id', $pustakawan->id)
+            ->where('tanggal', $tanggal)
+            ->where('jadwal_id', $jadwal->id)
+            ->first();
+
+        if ($cek) {
+            return back()->with('error', "Hi! {$nama} Sudah absen pada shift ini");
+        }
+
+        AbsenStruktural::create([
+            'pustakawan_id' => $pustakawan->id,
+            'jadwal_id'     => $jadwal->id,
+            'tanggal'       => $tanggal,
+            'jam_masuk'     => $jam,
+            'keterangan'    => 'Hadir',
+        ]);
+
+        return back()->with('success', "Terima kasih {$nama}, anda telah berhasil melakukan absen hari ini");
     }
 
 
-    public function absen_struktural(Request $request)
+    public function absen_face(Request $request)
     {
         $request->validate([
             'nik'       => 'required',
@@ -153,6 +236,11 @@ class AbsenController extends Controller
         ]);
 
         return back()->with('success', 'Terima kasih anda telah absen hari ini');
+    }
+
+    public function absen_strkutural() {
+
+        return view('admin.Absen.absen_struktural');
     }
 
     public function mandiri(Request $request) {

@@ -52,9 +52,9 @@ Route::middleware([Authenticate::class])->group(function () {
 // Route public
 // #############################################
 
-// Pustakawan Struktural
-Route::get('/absen-struktural', [AbsenController::class, 'struktural'])->name('absen-struktural');
-Route::post('/absen-struktural', [AbsenController::class, 'absen_struktural'])->name('struktural-proses');
+// Pustakawan Struktural Face Recognition
+Route::get('/absen-face', [AbsenController::class, 'face_recognition'])->name('absen-face');
+Route::post('/absen-face', [AbsenController::class, 'absen_face'])->name('struktural-proses');
 Route::get('/struktural-cetak/{bulan}/{tahun}', [LaporanStrukturalController::class, 'strukturalPDF'])->name('struktural.cetak');
 
 // WhatsApp Notification
@@ -62,6 +62,10 @@ Route::match(['get', 'post'], '/webhook-fonnte', [WaNotifController::class, 'web
 
 // Laporan WhatsApp Fonnte
 Route::get('/kirim-laporan-struktural', [AbsenController::class, 'kirimLaporan'])->name('kirim.laporan.struktural');
+
+// Pustakawan Struktural Biasa
+Route::get('/absen-struktural', [AbsenController::class, 'absen_struktural'])->name('absen-struktural');
+Route::post('/absen-struktural', [AbsenController::class, 'absen_struktural_proses'])->name('struktural-biasa-proses');
 
 // Tenaga Khidmah
 Route::get('/tenaga-khidmah/cetak', [LaporanTenagaKhidmahController::class, 'tenagaKhidmahPDF'])->name('tenaga-khidmah.cetak');

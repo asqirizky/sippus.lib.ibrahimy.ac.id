@@ -58,7 +58,7 @@
 				<div class="row g-5 gx-xl-10 mb-5 mb-xl-10">
 					<!--begin::Col-->
 					<div class="col-xl-3">
-						<a href="{{ url('absen-struktural') }}" class="card-link">
+						<a href="{{ url('absen-face') }}" class="card-link">
 							<div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-xl-100 card-hover-dark"
 								style="background-color: #35cd6d; background-image:url('{{ asset('admin/assets/media/pattern.png') }}')">
 								<!--begin::Header-->
@@ -83,6 +83,47 @@
 									<div class="fw-bold fs-6 text-white">
 										<span class="d-block">Ruang untuk</span>
 										<span>Pustakawan Struktural</span>
+										<span>menggunakan face recognition</span>
+									</div>
+								</div>
+								<div class="card-footer card-footer-dark">
+									<div class="fw-bold text-white py-2">
+										<span class="fs-5 d-block">Klik untuk masuk</span>
+										<span class="opacity-50">Absensi Struktural</span>
+									</div>
+								</div>
+							</div>
+						</a>
+					</div>
+					<!--end::Col-->
+					<!--begin::Col-->
+					<div class="col-xl-3">
+						<a href="{{ route('absen-struktural') }}" class="card-link">
+							<div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-xl-100 card-hover-dark"
+								style="background-color: #35b9cd; background-image:url('{{ asset('admin/assets/media/pattern.png') }}')">
+								<!--begin::Header-->
+								<div class="card-header pt-5 mb-3">
+									<!--begin::Icon-->
+									<div class="d-flex flex-center rounded-circle h-80px w-80px" style="border: 1px dashed rgba(255, 255, 255, 0.4);background-color: #35b9cd">
+										<i class="ki-duotone ki-shield-tick text-white fs-2qx lh-0">
+											<span class="path1"></span>
+											<span class="path2"></span>
+											<span class="path3"></span>
+											<span class="path4"></span>
+											<span class="path5"></span>
+											<span class="path6"></span>
+											<span class="path7"></span>
+											<span class="path8"></span>
+										</i>
+									</div>
+									<!--end::Icon-->
+								</div>
+								<!--end::Header-->
+								<div class="card-body d-flex align-items-end mb-3">
+									<div class="fw-bold fs-6 text-white">
+										<span class="d-block">Ruang untuk</span>
+										<span>Pustakawan Struktural</span>
+										<span>Biasa</span>
 									</div>
 								</div>
 								<div class="card-footer card-footer-dark">
