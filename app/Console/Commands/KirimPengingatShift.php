@@ -77,7 +77,7 @@ class KirimPengingatShift extends Command
             $pesan = "*Assalamu'alaikum Wr. Wb.*\n\n";
             $pesan .= "Yth. {$pustakawan->nama_pustakawan}\n\n";
             $pesan .= "Anda memiliki jadwal *Shift " . ucfirst($shift) . "* hari ini.\n";
-            $pesan .= "Jika sudah berada di lingkungan perpustakaan, silakan segera melakukan presensi dengan mengirim *Hadir*.";
+            $pesan .= "Jika sudah berada di lingkungan perpustakaan, silakan segera melakukan presensi melalui aplikasi/web SIPPUS.\n";
             $pesan .= "Apabila berhalangan hadir, silakan mengirim *Izin*.\n\n";
             $pesan .= "Terima kasih.\n\n";
             $pesan .= "_Pesan ini dikirim secara otomatis oleh SIPPUS (Sistem Informasi Presensi Pustakawan)._";

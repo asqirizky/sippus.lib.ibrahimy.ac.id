@@ -164,13 +164,6 @@ class WaNotifController extends Controller
             $balasan = "Proses izin berhasil dibatalkan.\n\nKetik *izin* untuk memulai lagi.";
         }
 
-        // hadir
-        elseif ($pesanMasuk === 'hadir') {
-
-            $balasan = "*Presensi Kehadiran*\n\n"
-                . "Maaf, fitur presensi untuk sementara dinonaktifkan.";
-        }
-
         // salam
         elseif (in_array($pesanMasuk, ['hai', 'halo'])) {
 
@@ -211,20 +204,7 @@ class WaNotifController extends Controller
             return response('OK', 200);
         }
 
-        // =========================
-        // PRESENSI DENGAN LOKASI (Dinonaktifkan sementara)
-        // =========================
-        if ($request->location != null || str_contains($pesanMasuk, 'loc:')) {
-
-            Log::info('LOKASI DITERIMA TAPI PRESENSI SEDANG DINONAKTIFKAN', [
-                'pengirim' => $pengirim,
-                'lokasi' => $request->location,
-            ]);
-
-            $balasan = "*Presensi Kehadiran*\n\n"
-                . "Maaf, fitur presensi untuk sementara dinonaktifkan.";
-
-        } elseif ($pesanMasuk === 'izin') {
+        if ($pesanMasuk === 'izin') {
 
             try {
 
