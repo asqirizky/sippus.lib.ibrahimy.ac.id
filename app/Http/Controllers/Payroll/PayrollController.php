@@ -30,7 +30,7 @@ class PayrollController extends Controller
 
         if (request()->is('admin/payroll-jabatan')) {
 
-            $jabatan = Jabatan::where('status', 1)->get();
+            $jabatan = Jabatan::where('status', 1)->orderBy('eselon')->get();
             $payJabatan = PayrollJabatan::with('jabatan')
                 ->join('jabatans', 'tunjangan_jabatans.jabatan_id', '=', 'jabatans.id')
                 ->orderBy('tunjangan_jabatans.APBM')
