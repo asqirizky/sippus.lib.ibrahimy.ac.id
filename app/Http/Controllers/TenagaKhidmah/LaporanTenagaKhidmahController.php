@@ -47,6 +47,7 @@ class LaporanTenagaKhidmahController extends Controller
 
         // 3. Ambil data Personil Khidmah Aktif (Kunci: Mengecualikan kru Viar id ruang 6 & 7)
         $pustakawan = Pustakawan::where('status', 1)
+            ->where('tmt', '<=', $endDate)
             ->whereHas('jabatan', function($q) {
                 $q->where('nama_jabatan', 'Tenaga Khidmah');
             })

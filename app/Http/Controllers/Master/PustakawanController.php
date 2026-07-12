@@ -215,33 +215,6 @@ class PustakawanController extends Controller
             'no_wa' => 'nullable',
         ]);
 
-        $jabatan = Jabatan::findOrFail($request->jabatan_id);
-        $eselon = $jabatan->eselon ?? 0;
-
-        $isKhidmah = str_contains(strtolower($jabatan->nama_jabatan), 'khidmah');
-
-        $field = $isKhidmah ? 'tgl_khidmah' : 'tmt';
-        $tanggal = $isKhidmah ? $request->tgl_khidmah : $request->tmt;
-
-        $tahun = Carbon::parse($tanggal)->format('Y');
-
-        $prefix = $tahun . $eselon;
-
-        $lastNik = Pustakawan::where('nik', 'like', $prefix . '%')
-            ->where('id', '!=', $id)
-            ->orderBy('nik', 'desc')
-            ->value('nik');
-
-        if ($lastNik) {
-            $lastNumber = (int) substr($lastNik, -3);
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 1;
-        }
-
-        $noUrut = str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-        $nik = $prefix . $noUrut;
-
         // Format nomor WhatsApp
         $noWa = $request->no_wa;
 
@@ -284,7 +257,6 @@ class PustakawanController extends Controller
         }
 
         $pustakawan->update([
-            'nik' => $nik,
             'nama_pustakawan' => $request->nama_pustakawan,
             'tempat_lahir' => $request->tempat_lahir,
             'tgl_lahir' => $request->tgl_lahir,

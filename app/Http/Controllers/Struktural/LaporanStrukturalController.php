@@ -104,6 +104,7 @@ class LaporanStrukturalController extends Controller
                 DB::raw('COALESCE(barokah_strukturals.sks, 0) as sks'),
             )->where('pustakawans.status', 1)
                 ->where('jabatans.nama_jabatan', '!=', 'Tenaga Khidmah')
+                ->where('pustakawans.tmt', '<=', $endDate)
                 ->orderBy('jabatans.eselon', 'asc')
                 ->get();
 

@@ -79,7 +79,7 @@
                         <table class="table align-middle table-striped fs-6 gy-5" id="kt_ecommerce_products_table">
                             <thead class="fw-bold fs-5 bg-success">
                                 <tr class="text-white text-start fw-bold fs-7 text-uppercase gs-0">
-                                    <th class="text-center rounded-start w-125px pe-2">nik</th>
+                                    <th class="text-center rounded-start w-125px pe-2">id user</th>
                                     <th class="text-start min-w-250px">Nama</th>
                                     <th></th>
                                     <th class="text-center min-w-80px">Ruang</th>

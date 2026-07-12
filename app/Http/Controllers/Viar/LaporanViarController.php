@@ -47,6 +47,7 @@ class LaporanViarController extends Controller
 
         // 3. Ambil data Personil Kru Viar Aktif (Kunci: Hanya ruang_id 6 & 7)
         $pustakawan = Pustakawan::where('status', 1)
+            ->where('tmt', '<=', $endDate)
             ->whereIn('ruang_id', [6, 7]) // <-- Filter khusus Kru Viar
             ->orderBy('nama_pustakawan', 'asc')
             ->get();

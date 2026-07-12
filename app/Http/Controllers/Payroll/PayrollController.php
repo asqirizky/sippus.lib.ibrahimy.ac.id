@@ -31,7 +31,12 @@ class PayrollController extends Controller
         if (request()->is('admin/payroll-jabatan')) {
 
             $jabatan = Jabatan::where('status', 1)->get();
-            $payJabatan = PayrollJabatan::with('jabatan')->get();
+            $payJabatan = PayrollJabatan::with('jabatan')
+                ->join('jabatans', 'tunjangan_jabatans.jabatan_id', '=', 'jabatans.id')
+                ->orderBy('tunjangan_jabatans.APBM')
+                ->orderBy('jabatans.eselon')
+                ->select('tunjangan_jabatans.*')
+                ->get();
             
             return view('admin.Payroll.jabatan.jabatan', compact(
                 'payJabatan',
@@ -99,6 +104,17 @@ class PayrollController extends Controller
                 'tempatTinggal' => $request->tempatTinggal,
                 'tunjangan'     => $request->tunjangan,
                 'APBM'          => $request->APBM,
+            ]);
+
+            return back()->with('success', 'Data berhasil ditambahkan');
+        }
+
+        if (request()->is('admin/payroll-jabatan')) {
+
+            PayrollJabatan::create([
+                'jabatan_id' => $request->jabatan_id,
+                'tunjangan_jabatan' => $request->tunjangan_jabatan,
+                'APBM' => $request->APBM,
             ]);
 
             return back()->with('success', 'Data berhasil ditambahkan');
