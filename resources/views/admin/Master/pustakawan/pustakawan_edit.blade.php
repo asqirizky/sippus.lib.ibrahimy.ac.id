@@ -82,7 +82,11 @@
                     <label class="mb-2 fw-semibold fs-6">NIK</label>
                     <!--end::Label-->
                     <!--begin::Col-->
-                    <input type="text" class="form-control form-control-solid form-control-lg" value="{{ $pustakawan->nik }}" required readonly>
+                    <input type="text" id="nikDisplay{{ $pustakawan->id }}" class="form-control form-control-solid form-control-lg" value="{{ $pustakawan->nik }}" required readonly>
+                    <input type="hidden" id="nikHidden{{ $pustakawan->id }}" name="nik" value="{{ $pustakawan->nik }}">
+                    <div id="nikPreview{{ $pustakawan->id }}" class="form-text text-info d-none">
+                        NIK akan berubah jika jabatan diganti
+                    </div>
                     <!--end::Col-->
                 </div>
                 <!--end::Input group-->
@@ -231,10 +235,11 @@
                     <!--end::Label-->
                     <!--begin::Col-->
                     <div class="mb-8 fv-row">
-                        <select class="form-select" id="jabatanSelect" name="jabatan_id" value="" data-control="select2" data-hide-search="true" data-placeholder="Pilih Jabatan" required >
+                        <select class="form-select" id="jabatanSelect{{ $pustakawan->id }}" name="jabatan_id" value="" data-control="select2" data-hide-search="true" data-placeholder="Pilih Jabatan" required >
                             <option value="" disabled selected>Pilih Jabatan</option>
                             @foreach ($jabatan as $jab)
                                 <option value="{{ $jab->id }}"
+                                    data-eselon="{{ $jab->eselon }}"
                                     {{ old('jabatan_id', $pustakawan->jabatan_id ?? '') == $jab->id ? 'selected' : '' }}>
                                     {{ $jab->nama_jabatan }}
                                 </option>
@@ -337,8 +342,7 @@
 
                 <div class="text-center">
                     <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Cancel</button>
-                    {{--  <button class="btn btn-primary" >  --}}
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="submitEditBtn{{ $pustakawan->id }}">
                         <span class="indicator-label">Simpan</span>
                         <span class="indicator-progress">Please wait...
                         <span class="align-middle spinner-border spinner-border-sm ms-2"></span></span>
@@ -391,6 +395,41 @@ input.addEventListener('input', function () {
 </script>
 
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector('#kt_modal_edit{{ $pustakawan->id }} form');
+    const submitBtn = document.getElementById('submitEditBtn{{ $pustakawan->id }}');
+
+    if (form && submitBtn) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Simpan Perubahan?',
+                text: 'Data biodata pustakawan akan diperbarui.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitBtn.classList.add('btn-disabled');
+                    submitBtn.disabled = true;
+                    submitBtn.querySelector('.indicator-label').classList.add('d-none');
+                    submitBtn.querySelector('.indicator-progress').classList.remove('d-none');
+                    form.submit();
+                }
+            });
+        });
+    }
+});
+</script>
+
+<script>
     function updateStatusLabel() {
         const checkbox = document.getElementById('statusCheckbox');
         const label = document.getElementById('statusLabel');
@@ -398,7 +437,11 @@ input.addEventListener('input', function () {
     }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const jabatanSelect = document.getElementById("jabatanSelect");
+    const jabatanSelect = document.getElementById("jabatanSelect{{ $pustakawan->id }}");
+    const nikDisplay = document.getElementById("nikDisplay{{ $pustakawan->id }}");
+    const nikPreview = document.getElementById("nikPreview{{ $pustakawan->id }}");
+    const currentNik = '{{ $pustakawan->nik }}';
+    const currentJabatanId = '{{ $pustakawan->jabatan_id }}';
 
     function setFieldState(elements, disabled) {
         elements.forEach(el => {
@@ -410,6 +453,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 el.classList.remove('form-control-solid');
             }
         });
+    }
+
+    function updateNikPreview() {
+        const selectedOption = jabatanSelect.options[jabatanSelect.selectedIndex];
+        const newJabatanId = jabatanSelect.value;
+        const newEselon = selectedOption.getAttribute('data-eselon');
+
+        if (newJabatanId && newEselon !== null && newJabatanId != currentJabatanId) {
+            const tahun = currentNik.substring(0, 4);
+            const urut = currentNik.substring(currentNik.length - 3);
+            const newNik = tahun + newEselon + urut;
+
+            nikDisplay.value = newNik;
+            nikPreview.classList.remove('d-none');
+            nikPreview.textContent = 'NIK akan berubah: ' + currentNik + ' → ' + newNik;
+        } else {
+            nikDisplay.value = currentNik;
+            nikPreview.classList.add('d-none');
+        }
     }
 
     function toggleField() {
@@ -429,6 +491,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     toggleField();
-    jabatanSelect.addEventListener('change', toggleField);
+    updateNikPreview();
+    jabatanSelect.addEventListener('change', function() {
+        toggleField();
+        updateNikPreview();
+    });
 });
 </script>

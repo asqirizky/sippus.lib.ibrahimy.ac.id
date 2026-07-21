@@ -346,7 +346,7 @@
 							<!--begin::Button-->
 							<!--end::Button-->
 							<!--begin::Button-->
-							<button type="submit" class="btn btn-primary">
+							<button type="submit" class="btn btn-primary" id="submitTambahBtn">
 								<span class="indicator-label">Simpan</span>
 								<span class="indicator-progress">Please wait...
 								<span class="align-middle spinner-border spinner-border-sm ms-2"></span></span>
@@ -510,4 +510,34 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 });
+
+const tambahForm = document.querySelector('form[enctype="multipart/form-data"]');
+const submitTambahBtn = document.getElementById('submitTambahBtn');
+
+if (tambahForm && submitTambahBtn) {
+    tambahForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Simpan Data Pustakawan?',
+            text: 'Data pustakawan baru akan ditambahkan.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal',
+            customClass: {
+                confirmButton: 'btn btn-primary',
+                cancelButton: 'btn btn-secondary'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                submitTambahBtn.disabled = true;
+                submitTambahBtn.querySelector('.indicator-label').classList.add('d-none');
+                submitTambahBtn.querySelector('.indicator-progress').classList.remove('d-none');
+                tambahForm.submit();
+            }
+        });
+    });
+}
 </script>

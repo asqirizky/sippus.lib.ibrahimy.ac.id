@@ -91,7 +91,7 @@
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 fw-semibold">
-                                @foreach ($jabatan->sortBy('ranking') as $item)
+                                @foreach ($jabatan->sortBy('eselon') as $item)
                                 <tr>
                                     <td class="text-center"></td>
                                     <td class="text-center">{{ $item->nama_jabatan }}</td>

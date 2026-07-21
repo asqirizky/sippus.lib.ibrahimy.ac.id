@@ -81,7 +81,7 @@
 									<div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" class="menu-item menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
 										<!--begin:Menu link-->
 										<span class="menu-link">
-											<span class="menu-title">Sistem Manajemen Website Perpustakaan Ibrahimy</span>
+											<span class="menu-title">Sistem Informasi Presensi Pustakawan</span>
 										</span>
 										<!--end:Menu link-->
 									</div>
@@ -782,6 +782,11 @@
 			<!--end::Page-->
 		</div>
 		<!--end::App-->
+        <script>var hostUrl = "admin/assets/";</script>
+		<!--begin::Global Javascript Bundle(mandatory for all pages)-->
+		<script src="admin/assets/plugins/global/plugins.bundle.js"></script>
+		<script src="admin/assets/js/scripts.bundle.js"></script>
+		<!--end::Global Javascript Bundle-->
         @if (session('success'))
         <script>
             Swal.fire({
@@ -901,12 +906,6 @@
         </script>
 		<!--end::Javascript-->
 
-		<!--begin::Javascript-->
-		<script>var hostUrl = "admin/assets/";</script>
-		<!--begin::Global Javascript Bundle(mandatory for all pages)-->
-		<script src="admin/assets/plugins/global/plugins.bundle.js"></script>
-		<script src="admin/assets/js/scripts.bundle.js"></script>
-		<!--end::Global Javascript Bundle-->
 		<!--begin::Vendors Javascript(used for this page only)-->
 		<script src="admin/assets/plugins/custom/fullcalendar/fullcalendar.bundle.js"></script>
 		<script src="https://cdn.amcharts.com/lib/5/index.js"></script>

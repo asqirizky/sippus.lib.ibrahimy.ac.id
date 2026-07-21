@@ -32,7 +32,7 @@
                     <label class="mb-2 required fw-semibold fs-6">Eselon</label>
                     <!--end::Label-->
                     <!--begin::Col-->
-                        <input type="type" class="form-control form-control-lg" name="eselon" id="eselon" placeholder="Eselon" required>
+                        <input type="number" class="form-control form-control-lg" name="eselon" id="eselon" placeholder="Eselon" required>
                     <!--end::Col-->
                 </div>
                 <!--end::Input group-->

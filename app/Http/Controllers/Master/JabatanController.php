@@ -37,8 +37,9 @@ class JabatanController extends Controller
 
         $jabatan->update([
             'eselon' => $request->eselon,
-            'jabatan' => $request->nama_jabatan,
+            'nama_jabatan' => $request->nama_jabatan,
             'status' => $request->has('status') ? '1' : '0',
+            'ranking' => (int) $request->eselon,
         ]);
 
         return back()->with('success', 'Data berhasil diperbarui');

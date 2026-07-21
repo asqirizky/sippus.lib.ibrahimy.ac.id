@@ -256,7 +256,22 @@ class PustakawanController extends Controller
             $pustakawan->foto = $namaFile;
         }
 
+        // Regenerate NIK jika jabatan berubah
+        $newNik = $pustakawan->nik;
+
+        if ($pustakawan->jabatan_id != $request->jabatan_id) {
+            $nikLama = $pustakawan->nik;
+            $tahun = substr($nikLama, 0, 4);
+            $urut = substr($nikLama, -3);
+
+            $jabatanBaru = Jabatan::findOrFail($request->jabatan_id);
+            $eselonBaru = $jabatanBaru->eselon;
+
+            $newNik = $tahun . $eselonBaru . $urut;
+        }
+
         $pustakawan->update([
+            'nik' => $newNik,
             'nama_pustakawan' => $request->nama_pustakawan,
             'tempat_lahir' => $request->tempat_lahir,
             'tgl_lahir' => $request->tgl_lahir,
