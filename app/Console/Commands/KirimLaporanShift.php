@@ -194,8 +194,12 @@ class KirimLaporanShift extends Command
                         $item->pustakawan
                     )->nama_pustakawan;
 
+                    $jamMasuk = $item->jam_masuk
+                        ? Carbon::parse($item->jam_masuk)->format('H:i')
+                        : '-';
+
                     $pesan .= $no++ . ". ";
-                    $pesan .= "{$nama}\n";
+                    $pesan .= "{$nama} ({$jamMasuk})\n";
                 }
 
             } else {
