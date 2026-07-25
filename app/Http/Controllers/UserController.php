@@ -67,11 +67,22 @@ class UserController extends Controller
 
     public function ubahpassword(Request $request, $id) : RedirectResponse
     {
-        $request->validate([
-            'password' => 'required|min:8|confirmed',
-        ]);
-
         $user = User::findOrFail($id);
+
+        $authUser = auth()->user();
+
+        if ($authUser->id !== $user->id && !$authUser->hasPermissionTo('hak akses-lihat')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengubah password pengguna lain.');
+        }
+
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'current_password.current_password' => 'Password saat ini tidak sesuai.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
 
         $user->update([
             'password' => Hash::make($request->password),

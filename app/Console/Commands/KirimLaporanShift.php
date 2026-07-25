@@ -265,7 +265,7 @@ class KirimLaporanShift extends Command
             // KIRIM WHATSAPP
             // =========================
             $response = FonnteService::send(
-                env('FONNTE_GROUP'),
+                config('fonnte.group'),
                 $pesan
             );
 

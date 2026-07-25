@@ -566,7 +566,7 @@ class AbsenController extends Controller
         $pesan .= "Perpustakaan Ibrahimy";
 
         FonnteService::send(
-            env('FONNTE_GROUP'),
+            config('fonnte.group'),
             $pesan
         );
 
@@ -852,7 +852,23 @@ class AbsenController extends Controller
             return null;
         }
 
-        $fileName = 'absen_' . time() . '_' . uniqid() . '.jpg';
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_buffer($finfo, $imageData);
+        finfo_close($finfo);
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!in_array($mimeType, $allowedMimes)) {
+            Log::warning('Upload ditolak - MIME tidak valid: ' . ($mimeType ?: 'unknown'));
+            return null;
+        }
+
+        $extension = match ($mimeType) {
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            default => 'jpg',
+        };
+
+        $fileName = 'absen_' . time() . '_' . uniqid() . '.' . $extension;
         $filePath = public_path('admin/assets/media/' . $fileName);
 
         file_put_contents($filePath, $imageData);

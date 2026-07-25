@@ -38,7 +38,9 @@ Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
-Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::middleware([Authenticate::class])->group(function () {
+    Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+});
 
 Route::get('/halo', function () {
     return "Routing Laravel Berhasil Jalan!";
@@ -55,27 +57,26 @@ Route::middleware([Authenticate::class])->group(function () {
 // Pustakawan Struktural Face Recognition
 Route::get('/absen-face', [AbsenController::class, 'face_recognition'])->name('absen-face');
 Route::post('/absen-face', [AbsenController::class, 'absen_face'])->name('struktural-proses');
-Route::get('/struktural-cetak/{bulan}/{tahun}', [LaporanStrukturalController::class, 'strukturalPDF'])->name('struktural.cetak');
-
-// WhatsApp Notification
-Route::match(['get', 'post'], '/webhook-fonnte', [WaNotifController::class, 'webhook'])->name('webhook.fonnte');
-
-// Laporan WhatsApp Fonnte
-Route::get('/kirim-laporan-struktural', [AbsenController::class, 'kirimLaporan'])->name('kirim.laporan.struktural');
 
 // Pustakawan Struktural Biasa
 Route::get('/absen-struktural', [AbsenController::class, 'absen_struktural'])->name('absen-struktural');
 Route::post('/absen-struktural', [AbsenController::class, 'absen_struktural_proses'])->name('struktural-biasa-proses');
 
 // Tenaga Khidmah
-Route::get('/tenaga-khidmah/cetak', [LaporanTenagaKhidmahController::class, 'tenagaKhidmahPDF'])->name('tenaga-khidmah.cetak');
 Route::get('/absen-khidmah-room', [AbsenTenagaKhidmahController::class, 'khidmah'])->name('absen-khidmah-room');
 Route::post('/absen-khidmah-room', [AbsenTenagaKhidmahController::class, 'absen_khidmah'])->name('khidmah-proses-room');
 
 // Viar
 Route::get('/absen-viar-room', [AbsenViarController::class, 'viar'])->name('absen-viar');
 Route::post('/absen-viar-room', [AbsenViarController::class, 'absen_viar'])->name('absen-viar-proses');
-Route::get('/tenaga-viar/cetak', [LaporanViarController::class, 'viarPdf'])->name('viar.cetak');
+
+// Route dengan autentikasi - laporan dan notifikasi
+Route::middleware([Authenticate::class])->group(function () {
+    Route::get('/struktural-cetak/{bulan}/{tahun}', [LaporanStrukturalController::class, 'strukturalPDF'])->name('struktural.cetak');
+    Route::get('/tenaga-khidmah/cetak', [LaporanTenagaKhidmahController::class, 'tenagaKhidmahPDF'])->name('tenaga-khidmah.cetak');
+    Route::get('/tenaga-viar/cetak', [LaporanViarController::class, 'viarPdf'])->name('viar.cetak');
+    Route::get('/kirim-laporan-struktural', [AbsenController::class, 'kirimLaporan'])->name('kirim.laporan.struktural');
+});
 
 // #############################################
 // Route Admin Struktural

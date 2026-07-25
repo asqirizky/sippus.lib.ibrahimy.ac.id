@@ -33,7 +33,7 @@ class GoogleDriveService
 
         $driveFile = new DriveFile();
         $driveFile->setName($file->getClientOriginalName());
-        $driveFile->setParents([env('GOOGLE_DRIVE_FOLDER_ID')]); // Pastikan Folder ID di sini benar
+        $driveFile->setParents([config('filesystems.disks.google.folder_id')]); // Pastikan Folder ID di sini benar
 
         $createdFile = $this->driveService->files->create($driveFile, [
             'data' => $fileData,

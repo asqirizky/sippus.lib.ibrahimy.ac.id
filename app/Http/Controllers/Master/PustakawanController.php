@@ -134,9 +134,14 @@ class PustakawanController extends Controller
         $pustakawan = Pustakawan::findOrFail($id);
 
         $berkas = $request->file('berkas');
-        $fileName = $berkas->getClientOriginalName();
+        $extension = $berkas->getClientOriginalExtension();
+        $fileName = time() . '_' . md5($berkas->getRealPath() . uniqid()) . '.' . $extension;
 
         $berkas->storeAs('public/berkas', $fileName);
+
+        if ($pustakawan->berkas) {
+            Storage::delete('public/berkas/' . $pustakawan->berkas);
+        }
 
         $pustakawan->update([
             'berkas' => $fileName,

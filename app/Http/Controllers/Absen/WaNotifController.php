@@ -192,7 +192,7 @@ class WaNotifController extends Controller
                 'message' => $balasan
             ]);
 
-            $token = env('FONNTE_TOKEN');
+            $token = config('fonnte.token');
 
             Http::withHeaders([
                 'Authorization' => $token

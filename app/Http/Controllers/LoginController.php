@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use App\Models\User;
-
-
 
 class LoginController extends Controller
 {
@@ -16,17 +15,11 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-
-
-    // Menampilkan halaman login
     public function showLoginForm()
     {
-        $user = User::latest()->get();
-
-        return view('auth.login', compact('user')); // Pastikan ada file resources/views/auth/login.blade.php
+        return view('auth.login');
     }
 
-    // Proses login
     public function login(Request $request)
     {
         $request->validate([
@@ -34,21 +27,31 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Coba autentikasi dengan username & password
-        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
-            return redirect()->intended('/admin/home'); // Redirect ke halaman admin jika sukses
+        $key = 'login-attempts:' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return back()->withErrors([
+                'username' => 'Terlalu banyak percobaan. Silakan coba lagi dalam ' . $seconds . ' detik.',
+            ]);
         }
+
+        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+            RateLimiter::clear($key);
+            return redirect()->intended('/admin/home');
+        }
+
+        RateLimiter::hit($key, 60);
 
         return back()->withErrors([
             'username' => 'Username atau password salah.',
         ]);
     }
 
-    // Logout user
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
-        return redirect('/'); // Redirect kembali ke halaman login
+        return redirect('/');
     }
 }
