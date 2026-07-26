@@ -12,6 +12,10 @@ Schedule::command('pengingat:shift siang')
     ->days([6, 0, 1, 2, 3, 4])
     ->dailyAt('13:30');
 
+Schedule::command('pengingat:shift-tambahan siang')
+    ->days([6, 0, 1, 2, 3, 4])
+    ->dailyAt('14:00');
+
 Schedule::command('laporan:shift siang')
     ->days([6, 0, 1, 2, 3, 4])
     ->dailyAt('14:30');
@@ -19,6 +23,10 @@ Schedule::command('laporan:shift siang')
 Schedule::command('pengingat:shift malam')
     ->days([5, 6, 0, 1, 2, 3])
     ->dailyAt('20:30');
+
+Schedule::command('pengingat:shift-tambahan malam')
+    ->days([5, 6, 0, 1, 2, 3])
+    ->dailyAt('21:00');
 
 Schedule::command('laporan:shift malam')
     ->days([5, 6, 0, 1, 2, 3])

@@ -10,21 +10,21 @@ use App\Services\FonnteService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class KirimPengingatShift extends Command
+class KirimPengingatShiftTambahan extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'pengingat:shift {shift}';
+    protected $signature = 'pengingat:shift-tambahan {shift}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Kirim pengingat tambahan kepada pustakawan yang belum absen atau izin';
 
     /**
      * Execute the console command.
@@ -98,13 +98,14 @@ class KirimPengingatShift extends Command
                 $nomor = '62' . substr($nomor, 1);
             }
 
-            $pesan = "*Assalamu'alaikum Wr. Wb.*\n";
+            $pesan = "*Pemberitahuan*\n\n";
             $pesan .= "Yth. {$pustakawan->nama_pustakawan} ({$pustakawan->nik})\n\n";
             $pesan .= "Anda memiliki jadwal *Shift " . ucfirst($shift) . "* hari ini.\n";
-            $pesan .= "Jika sudah berada di lingkungan perpustakaan, silakan segera melakukan presensi melalui link:\n";
-            $pesan .= "sippus.lib.ibrahimy.ac.id/absen-face\n";
-            $pesan .= "Apabila berhalangan hadir, silakan mengirim *Izin*.\n\n";
-            $pesan .= "Atas perhatiannya terima kasih.\n\n";
+            $pesan .= "Hingga saat ini anda belum melakukan *presensi* atau *izin*.\n\n";
+            $pesan .= "Silakan segera lakukan salah satu:\n";
+            $pesan .= "1. *Presensi* melalui link: sippus.lib.ibrahimy.ac.id/absen-face\n";
+            $pesan .= "2. *Izin* jika berhalangan hadir\n\n";
+            $pesan .= "Mohon perhatiannya, terima kasih.\n\n";
             $pesan .= "_Pesan ini dikirim secara otomatis oleh SIPPUS (Sistem Informasi Presensi Pustakawan)._";
 
             FonnteService::send($nomor, $pesan);
@@ -113,6 +114,6 @@ class KirimPengingatShift extends Command
             usleep(500000);
         }
 
-        $this->info("Pengingat berhasil dikirim kepada {$semuaPustakawan->count()} pustakawan.");
+        $this->info("Pengingat tambahan berhasil dikirim kepada {$semuaPustakawan->count()} pustakawan.");
     }
 }
