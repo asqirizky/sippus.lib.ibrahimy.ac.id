@@ -15,8 +15,13 @@ class LaporanViarController extends Controller
 {
     public function viarPDF(Request $request)
     {
-        $bulan = $request->input('bulan', Carbon::now()->month);
-        $tahun = $request->input('tahun', Carbon::now()->year);
+        $request->validate([
+            'bulan' => ['nullable', 'integer', 'between:1,12'],
+            'tahun' => ['nullable', 'integer', 'between:2000,2100'],
+        ]);
+
+        $bulan = (int) $request->input('bulan', Carbon::now()->month);
+        $tahun = (int) $request->input('tahun', Carbon::now()->year);
 
         $startDate = Carbon::create($tahun, $bulan, 1)->startOfMonth()->format('Y-m-d');
         $endDate   = Carbon::create($tahun, $bulan, 1)->endOfMonth()->format('Y-m-d');
@@ -47,12 +52,14 @@ class LaporanViarController extends Controller
 
         // 3. Ambil data Personil Kru Viar Aktif (Kunci: Hanya ruang_id 6 & 7)
         $pustakawan = Pustakawan::where('status', 1)
-            ->where('tmt', '<=', $endDate)
+            ->where(function ($query) use ($endDate) {
+                $query->whereNull('tmt')->orWhere('tmt', '<=', $endDate);
+            })
             ->whereIn('ruang_id', [6, 7]) // <-- Filter khusus Kru Viar
             ->orderBy('nama_pustakawan', 'asc')
             ->get();
 
-        $pustakawanIds = $pustakawan->pluck('id')->toArray();
+        $pustakawanIds = $pustakawan->pluck('id');
 
         // 4. Ambil data Izin Kru Viar melalui Join Tabel Pivot
         $izinRaw = DB::table('izin_pustakawans')
@@ -139,14 +146,48 @@ class LaporanViarController extends Controller
             }
         }
 
-        $tahun = $request->input('tahun', date('Y'));
-        $bulan = $request->input('bulan', date('m'));
-
-        // ambil data libur dari database berdasarkan bulan dan tahun aktif
         $liburs = Libur::with('jadwals')
-        ->whereMonth('tanggal', $bulan)
-        ->whereYear('tanggal', $tahun)
-        ->get();
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->get();
+
+        // Siapkan data ringkasan per orang untuk halaman pertama PDF. Format dan
+        // perhitungannya disamakan dengan laporan Tenaga Khidmah.
+        $rekapPersonil = $pustakawan->map(function ($personil) use ($rekapKehadiran, $dates, $liburs, $matriksJadwal, $nominalBarokah) {
+            $siang = $rekapKehadiran[$personil->id]['siang'] ?? 0;
+            $malam = $rekapKehadiran[$personil->id]['malam'] ?? 0;
+            $jumlahHadir = $rekapKehadiran[$personil->id]['total'] ?? 0;
+            $targetJadwal = 0;
+
+            foreach ($dates as $tanggal) {
+                foreach (['siang' => 'Siang', 'malam' => 'Malam'] as $shiftKey => $shiftName) {
+                    $libur = $liburs->contains(function ($item) use ($tanggal, $shiftName) {
+                        return $item->tanggal === $tanggal
+                            && $item->jadwals->contains('jadwal', $shiftName);
+                    });
+
+                    if (($matriksJadwal[$personil->id][$tanggal][$shiftKey] ?? false) && ! $libur) {
+                        $targetJadwal++;
+                    }
+                }
+            }
+
+            return [
+                'personil' => $personil,
+                'siang' => $siang,
+                'malam' => $malam,
+                'jumlah_hadir' => $jumlahHadir,
+                'persentase' => $targetJadwal > 0 ? min(100, round(($jumlahHadir / $targetJadwal) * 100)) : 0,
+                'jumlah_barokah' => $jumlahHadir * $nominalBarokah,
+            ];
+        });
+
+        $totalRekap = [
+            'siang' => $rekapPersonil->sum('siang'),
+            'malam' => $rekapPersonil->sum('malam'),
+            'jumlah_hadir' => $rekapPersonil->sum('jumlah_hadir'),
+            'jumlah_barokah' => $rekapPersonil->sum('jumlah_barokah'),
+        ];
 
         $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F');
 
@@ -154,7 +195,7 @@ class LaporanViarController extends Controller
         $pdf = Pdf::loadView('admin.Viar.RekapViar.laporan_viar', compact(
             'bulan', 'tahun', 'namaBulan', 'pustakawan', 'dates', 'qrUrl', 'periode',
             'nominalBarokah', 'izinViar', 'absensiData', 'rekapKehadiran', 'totalShiftWajib',
-            'jadwalMaster', 'matriksJadwal', 'liburs'
+            'jadwalMaster', 'matriksJadwal', 'liburs', 'rekapPersonil', 'totalRekap'
         ))->setPaper('A4', 'landscape');
 
         return $pdf->stream("rekap-absensi-viar-{$namaBulan}-{$tahun}.pdf");

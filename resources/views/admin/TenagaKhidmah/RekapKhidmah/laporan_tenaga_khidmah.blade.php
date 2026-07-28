@@ -211,65 +211,15 @@
                 </tr>
             </thead>
             <tbody>
-               @php $grandTotalBarokah = 0; @endphp
-@foreach($pustakawan as $index => $p)
-    @php
-        // 1. Ambil data kehadiran dari rekap controller
-        $siang = $rekapKehadiran[$p->id]['siang'] ?? 0;
-        $malam = $rekapKehadiran[$p->id]['malam'] ?? 0;
-        $totalHadir = $rekapKehadiran[$p->id]['total'] ?? 0;
-
-        // 2. Variabel untuk mengunci total target jadwal aktif TERSEDIA selama 1 bulan penuh
-        $totalJadwalTersediaSatuBulan = 0;
-
-        foreach($dates as $date) {
-
-            // Cek apakah ada Agenda Libur Resmi dari database untuk tanggal & shift ini
-            $isLiburResmiSiang = isset($liburs) ? $liburs->contains(function ($value) use ($date) {
-                return $value->tanggal == $date && $value->jadwals->contains('jadwal', 'Siang');
-            }) : false;
-
-            $isLiburResmiMalam = isset($liburs) ? $liburs->contains(function ($value) use ($date) {
-                return $value->tanggal == $date && $value->jadwals->contains('jadwal', 'Malam');
-            }) : false;
-
-            // Cek apakah pegawai MEMILIKI JADWAL MASUK di hari/shift tersebut sesuai matriks
-            $adaJadwalSiang = $matriksJadwal[$p->id][$date]['siang'] ?? false;
-            $adaJadwalMalam = $matriksJadwal[$p->id][$date]['malam'] ?? false;
-
-            // HITUNG TARGET SIANG: Hanya bertambah jika ADA JADWAL dan BUKAN HARI LIBUR RESMI
-            if ($adaJadwalSiang && !$isLiburResmiSiang) {
-                $totalJadwalTersediaSatuBulan++;
-            }
-
-            // HITUNG TARGET MALAM: Hanya bertambah jika ADA JADWAL dan BUKAN HARI LIBUR RESMI
-            if ($adaJadwalMalam && !$isLiburResmiMalam) {
-                $totalJadwalTersediaSatuBulan++;
-            }
-        }
-
-        // 3. Eksekusi Persentase Target Bulanan Mutlak
-        // Jaga-jaga agar tidak error pembagian dengan angka 0 (division by zero)
-        if($totalJadwalTersediaSatuBulan == 0) $totalJadwalTersediaSatuBulan = 1;
-
-        // Rumus utama: Total Hadir real dibagi Total Target Jadwal Aktif selama 1 Bulan Penuh
-        $persentase = round(($totalHadir / $totalJadwalTersediaSatuBulan) * 100);
-
-        // Kunci maksimal di angka 100%
-        if($persentase > 100) $persentase = 100;
-
-        // Hitungan uang barokah tetap berpatokan pada jumlah kehadiran real
-        $totalBarokahOrang = $totalHadir * $nominalBarokah;
-        $grandTotalBarokah += $totalBarokahOrang;
-    @endphp
+                @foreach($rekapPersonil as $index => $rekap)
                     <tr>
                         <td style="text-align: center">{{ $index + 1 }}</td>
-                        <td style="width: 25%" class="text-left">{{ $p->nama_pustakawan }}</td>
-                        <td>{{ $siang }}</td>
-                        <td>{{ $malam }}</td>
-                        <td>{{ $totalHadir }}</td>
-                        <td>{{ $persentase }}%</td>
-                        <td>Rp. {{ number_format($totalBarokahOrang, 0, ',', '.') }}</td>
+                        <td style="width: 25%" class="text-left">{{ $rekap['personil']->nama_pustakawan }}</td>
+                        <td>{{ $rekap['siang'] }}</td>
+                        <td>{{ $rekap['malam'] }}</td>
+                        <td>{{ $rekap['jumlah_hadir'] }}</td>
+                        <td>{{ $rekap['persentase'] }}%</td>
+                        <td>Rp. {{ number_format($rekap['jumlah_barokah'], 0, ',', '.') }}</td>
                         <td style="font-size: 9px; vertical-align: bottom; height: 22px; padding: 3px 15px; border-top: none !important; border-left: none !important; border-bottom: none !important; border-right: 1px solid #000 !important;">
                             @if(($index + 1) % 2 != 0)
                                 <div style="text-align: left;">
@@ -285,11 +235,11 @@
                 @endforeach
                 <tr>
                     <td colspan="2" style="background-color: paleturquoise">Total</td>
-                    <td style="background-color: paleturquoise">{{ $pustakawan->sum(fn($p) => $rekapKehadiran[$p->id]['siang'] ?? 0) }}</td>
-                    <td style="background-color: paleturquoise">{{ $pustakawan->sum(fn($p) => $rekapKehadiran[$p->id]['malam'] ?? 0) }}</td>
-                    <td style="background-color: paleturquoise">{{ $pustakawan->sum(fn($p) => $rekapKehadiran[$p->id]['total'] ?? 0) }}</td>
+                    <td style="background-color: paleturquoise">{{ $totalRekap['siang'] }}</td>
+                    <td style="background-color: paleturquoise">{{ $totalRekap['malam'] }}</td>
+                    <td style="background-color: paleturquoise">{{ $totalRekap['jumlah_hadir'] }}</td>
                     <td style="background-color: paleturquoise">Total</td>
-                    <td style="background-color: paleturquoise">Rp. {{ number_format($grandTotalBarokah, 0, ',', '.') }}</td>
+                    <td style="background-color: paleturquoise">Rp. {{ number_format($totalRekap['jumlah_barokah'], 0, ',', '.') }}</td>
                     <td style="border-top: none"></td>
                 </tr>
             </tbody>

@@ -15,8 +15,13 @@ class LaporanTenagaKhidmahController extends Controller
 {
     public function tenagaKhidmahPDF(Request $request)
     {
-        $bulan = $request->input('bulan', Carbon::now()->month);
-        $tahun = $request->input('tahun', Carbon::now()->year);
+        $request->validate([
+            'bulan' => ['nullable', 'integer', 'between:1,12'],
+            'tahun' => ['nullable', 'integer', 'between:2000,2100'],
+        ]);
+
+        $bulan = (int) $request->input('bulan', Carbon::now()->month);
+        $tahun = (int) $request->input('tahun', Carbon::now()->year);
 
         $startDate = Carbon::create($tahun, $bulan, 1)->startOfMonth()->format('Y-m-d');
         $endDate   = Carbon::create($tahun, $bulan, 1)->endOfMonth()->format('Y-m-d');
@@ -47,13 +52,22 @@ class LaporanTenagaKhidmahController extends Controller
 
         // 3. Ambil data Personil Khidmah Aktif (Kunci: Mengecualikan kru Viar id ruang 6 & 7)
         $pustakawan = Pustakawan::where('status', 1)
-            ->where('tmt', '<=', $endDate)
-            ->whereHas('jabatan', function($q) {
-                $q->where('nama_jabatan', 'Tenaga Khidmah');
+            // Data lama tidak selalu mempunyai TMT. Personel aktif tersebut tetap
+            // harus muncul di laporan, selama belum melewati periode laporan.
+            ->where(function ($query) use ($endDate) {
+                $query->whereNull('tmt')->orWhere('tmt', '<=', $endDate);
             })
-            ->whereNotIn('ruang_id', [6, 7]) // <-- Kunci filter utama di sini, Bro!
+            ->whereHas('jabatan', function($q) {
+                $q->whereRaw('LOWER(nama_jabatan) = ?', ['tenaga khidmah']);
+            })
+            // NULL berarti belum ditempatkan di ruang; jangan sampai ikut hilang.
+            ->where(function ($query) {
+                $query->whereNull('ruang_id')->orWhereNotIn('ruang_id', [6, 7]);
+            })
             ->orderBy('nama_pustakawan', 'asc')
             ->get();
+
+        $pustakawanIds = $pustakawan->pluck('id');
 
         // 4. Ambil data Izin melalui Join Tabel Pivot (Filter agar anak Viar tidak ikut ketarik)
         $izinRaw = DB::table('izin_pustakawans')
@@ -61,7 +75,7 @@ class LaporanTenagaKhidmahController extends Controller
             ->join('jadwals', 'izin_pustakawan_jadwal.jadwal_id', '=', 'jadwals.id')
             ->join('pustakawans', 'izin_pustakawans.pustakawan_id', '=', 'pustakawans.id') // Join ke pustakawan untuk filter ruang
             ->whereBetween('izin_pustakawan_jadwal.tanggal', [$startDate, $endDate])
-            ->whereNotIn('pustakawans.ruang_id', [6, 7]) // <-- Kunci filter izin anak Viar
+            ->whereIn('izin_pustakawans.pustakawan_id', $pustakawanIds)
             ->select(
                 'izin_pustakawans.pustakawan_id',
                 'izin_pustakawans.keterangan as tipe_izin',
@@ -119,7 +133,7 @@ class LaporanTenagaKhidmahController extends Controller
             ->join('jadwals', 'absen_khidmah.jadwal_id', '=', 'jadwals.id')
             ->join('pustakawans', 'absen_khidmah.pustakawan_id', '=', 'pustakawans.id')
             ->whereBetween('absen_khidmah.tanggal', [$startDate, $endDate])
-            ->whereNotIn('pustakawans.ruang_id', [6, 7])
+            ->whereIn('absen_khidmah.pustakawan_id', $pustakawanIds)
             ->select('absen_khidmah.*', 'jadwals.jadwal as nama_shift')
             ->get();
 
@@ -152,14 +166,48 @@ class LaporanTenagaKhidmahController extends Controller
             }
         }
 
-        $tahun = $request->input('tahun', date('Y'));
-        $bulan = $request->input('bulan', date('m')); // Pastikan berformat angka dua digit (01-12)
+        $liburs = Libur::with('jadwals')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->get();
 
-        // AMBIL DATA LIBUR DARI DATABASE BERDASARKAN BULAN DAN TAHUN AKTIF
-       $liburs = Libur::with('jadwals')
-        ->whereMonth('tanggal', $bulan)
-        ->whereYear('tanggal', $tahun)
-        ->get();
+        // Data siap tampil untuk halaman ringkasan PDF. Perhitungan dipusatkan di
+        // controller agar nama, kehadiran, dan nominal barokah selalu sejalan.
+        $rekapPersonil = $pustakawan->map(function ($personil) use ($rekapKehadiran, $dates, $liburs, $matriksJadwal, $nominalBarokah) {
+            $siang = $rekapKehadiran[$personil->id]['siang'] ?? 0;
+            $malam = $rekapKehadiran[$personil->id]['malam'] ?? 0;
+            $jumlahHadir = $rekapKehadiran[$personil->id]['total'] ?? 0;
+            $targetJadwal = 0;
+
+            foreach ($dates as $tanggal) {
+                foreach (['siang' => 'Siang', 'malam' => 'Malam'] as $shiftKey => $shiftName) {
+                    $libur = $liburs->contains(function ($item) use ($tanggal, $shiftName) {
+                        return $item->tanggal === $tanggal
+                            && $item->jadwals->contains('jadwal', $shiftName);
+                    });
+
+                    if (($matriksJadwal[$personil->id][$tanggal][$shiftKey] ?? false) && ! $libur) {
+                        $targetJadwal++;
+                    }
+                }
+            }
+
+            return [
+                'personil' => $personil,
+                'siang' => $siang,
+                'malam' => $malam,
+                'jumlah_hadir' => $jumlahHadir,
+                'persentase' => $targetJadwal > 0 ? min(100, round(($jumlahHadir / $targetJadwal) * 100)) : 0,
+                'jumlah_barokah' => $jumlahHadir * $nominalBarokah,
+            ];
+        });
+
+        $totalRekap = [
+            'siang' => $rekapPersonil->sum('siang'),
+            'malam' => $rekapPersonil->sum('malam'),
+            'jumlah_hadir' => $rekapPersonil->sum('jumlah_hadir'),
+            'jumlah_barokah' => $rekapPersonil->sum('jumlah_barokah'),
+        ];
 
         $namaBulan = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('F');
 
@@ -167,7 +215,7 @@ class LaporanTenagaKhidmahController extends Controller
         $pdf = Pdf::loadView('admin.TenagaKhidmah.RekapKhidmah.laporan_tenaga_khidmah', compact(
             'bulan', 'tahun', 'namaBulan', 'pustakawan', 'dates', 'qrUrl', 'periode',
             'nominalBarokah', 'izinKhidmah', 'absensiData', 'rekapKehadiran', 'totalShiftWajib',
-            'jadwalMaster', 'matriksJadwal', 'liburs' // <-- AMBIL & TAMBAHKAN INI
+            'jadwalMaster', 'matriksJadwal', 'liburs', 'rekapPersonil', 'totalRekap'
         ))->setPaper('A4', 'landscape');
 
         return $pdf->stream("rekap-absensi-khidmah-{$namaBulan}-{$tahun}.pdf");
