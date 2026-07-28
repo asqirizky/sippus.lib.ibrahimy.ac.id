@@ -50,6 +50,9 @@ Route::middleware([Authenticate::class])->group(function () {
     Route::get('/admin/home', [HomeController::class, 'index'])->name('home-user');
 });
 
+// Webhook Fonnte (WhatsApp)
+Route::any('/webhook-fonnte', [WaNotifController::class, 'webhook']);
+
 // #############################################
 // Route public
 // #############################################

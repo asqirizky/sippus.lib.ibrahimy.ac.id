@@ -316,10 +316,6 @@ class WaNotifController extends Controller
                     $jadwalSiang = Jadwal::where('jadwal', 'Siang')->first();
                     $jadwalMalam = Jadwal::where('jadwal', 'Malam')->first();
 
-                    $jadwalPagi  = Jadwal::where('jadwal', 'Pagi')->first();
-                    $jadwalSiang = Jadwal::where('jadwal', 'Siang')->first();
-                    $jadwalMalam = Jadwal::where('jadwal', 'Malam')->first();
-
                     if ($jadwal->pagi == 1 && $jadwalPagi) {
                         $balasan .= $no . ". Pagi\n";
                         $mapping[$no] = $jadwalPagi->id;
