@@ -206,7 +206,7 @@
 										<!--end::Label-->
 										<!--begin::Col-->
 										<div class="col-lg-8">
-											<span class="text-gray-800 fw-bold fs-6">{{ $pustakawan->jabatan->nama_jabatan }}</span>
+											<span class="text-gray-800 fw-bold fs-6">{{ $pustakawan->jabatan?->nama_jabatan ?? '-' }}</span>
 										</div>
 										<!--end::Col-->
 									</div>

@@ -105,7 +105,9 @@ class LaporanStrukturalController extends Controller
             )->where('pustakawans.status', 1)
                 ->where('jabatans.nama_jabatan', '!=', 'Tenaga Khidmah')
                 ->where('pustakawans.tmt', '<=', $endDate)
+                ->orderByRaw("CASE WHEN jabatans.nama_jabatan = 'Staff Magang' THEN 1 ELSE 0 END")
                 ->orderBy('jabatans.eselon', 'asc')
+                ->orderBy('pustakawans.nama_pustakawan', 'asc')
                 ->get();
 
 

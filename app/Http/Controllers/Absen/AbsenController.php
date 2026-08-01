@@ -15,7 +15,6 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class AbsenController extends Controller
 {
@@ -217,13 +216,16 @@ class AbsenController extends Controller
         // Verifikasi foto cocok dengan foto master pustakawan
         if (!empty($pustakawan->foto)) {
             $verified = $this->verifyPhoto($request->foto, $pustakawan->foto);
-            if (!$verified) {
-                return back()->with('error', 'Foto tidak sesuai dengan data pustakawan');
+            if ($verified !== true) {
+                return back()->with('error', $verified);
             }
         }
 
         // Save captured photo
         $fotoName = $this->saveCapturedPhoto($request->foto);
+        if (!is_null($fotoName) && !str_starts_with($fotoName, 'absen_')) {
+            return back()->with('error', $fotoName);
+        }
 
         AbsenStruktural::create([
             'pustakawan_id' => $pustakawan->id,
@@ -778,8 +780,7 @@ class AbsenController extends Controller
     {
         $masterPath = public_path('admin/assets/media/' . $masterPhotoFilename);
         if (!file_exists($masterPath)) {
-            Log::warning('Foto master tidak ditemukan: ' . $masterPhotoFilename);
-            return false;
+            return 'Foto master tidak ditemukan';
         }
 
         if (strpos($capturedBase64, ',') !== false) {
@@ -788,7 +789,7 @@ class AbsenController extends Controller
 
         $capturedData = base64_decode($capturedBase64);
         if (!$capturedData) {
-            return false;
+            return 'Data foto tidak valid';
         }
 
         $tempDir = storage_path('app/temp');
@@ -832,11 +833,8 @@ class AbsenController extends Controller
         @unlink($masterProc);
 
         if ($distance === null) {
-            Log::warning('Foto absen - gagal menjalankan ImageMagick');
-            return true;
+            return 'Gagal menjalankan ImageMagick, silakan coba lagi';
         }
-
-        Log::info("Foto absen - phash distance: {$distance} NIK: " . request('nik'));
 
         return $distance <= 120;
     }
@@ -849,7 +847,7 @@ class AbsenController extends Controller
 
         $imageData = base64_decode($base64Data);
         if (!$imageData) {
-            return null;
+            return 'Data foto tidak valid';
         }
 
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -858,8 +856,7 @@ class AbsenController extends Controller
 
         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!in_array($mimeType, $allowedMimes)) {
-            Log::warning('Upload ditolak - MIME tidak valid: ' . ($mimeType ?: 'unknown'));
-            return null;
+            return 'Upload ditolak - tipe file tidak valid';
         }
 
         $extension = match ($mimeType) {

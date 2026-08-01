@@ -142,7 +142,7 @@
                                     <td></td>
                                     <td class="text-center">
                                         <div class="px-4 py-3 badge fs-7 badge-light-success">
-                                            {{ $item->jabatan->nama_jabatan }}
+                                            {{ $item->jabatan?->nama_jabatan ?? '-' }}
                                         </div>
                                     </td>
                                     <td class="text-center">

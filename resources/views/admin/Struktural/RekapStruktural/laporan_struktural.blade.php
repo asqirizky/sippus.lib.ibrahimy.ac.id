@@ -426,7 +426,7 @@
                 <tr>
                     <td class="tengah">{{ $index + 1 }}</td>
                     <td class="kiri">{{ $item->nama_pustakawan }}</td>
-                    <td class="kiri">{{ $item->jabatan->nama_jabatan }}</td>
+                    <td class="kiri">{{ $item->jabatan?->nama_jabatan ?? '-' }}</td>
                     <td class="tengah">{{ Carbon::parse($item->tmt)->isoFormat('Y') }}</td>
                     <td class="tengah">{{ $mp }}</td>
 
@@ -602,7 +602,7 @@
                                 H
                             @elseif ($izinKet && $izinKet != 'L')
                                 {{ $izinKet }}
-                            @elseif ($isActiveShift)
+                            @elseif ($isActiveShift && !$izinKet)
                                 A
                             @endif
                         </td>
@@ -747,7 +747,7 @@
                                 H
                             @elseif ($izinKet && $izinKet != 'L')
                                 {{ $izinKet }}
-                            @elseif ($isActiveShift)
+                            @elseif ($isActiveShift && !$izinKet)
                                 A
                             @endif
                         </td>
@@ -891,7 +891,7 @@
                                 H
                             @elseif ($izinKet && $izinKet != 'L')
                                 {{ $izinKet }}
-                            @elseif ($isActiveShift)
+                            @elseif ($isActiveShift && !$izinKet)
                                 A
                             @endif
                         </td>

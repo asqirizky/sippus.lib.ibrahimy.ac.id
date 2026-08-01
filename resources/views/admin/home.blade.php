@@ -74,7 +74,7 @@
 												<a class="text-gray-800 text-hover-primary fs-5 fw-bold lh-0"> {{ $item->nama_pustakawan }} </a>
 												<!--end::Text-->
 												<!--begin::Description-->
-												<span class="text-gray-500 fw-semibold d-block fs-6"> {{ $item->jabatan->nama_jabatan }} </span>
+												<span class="text-gray-500 fw-semibold d-block fs-6"> {{ $item->jabatan?->nama_jabatan ?? '-' }} </span>
 												<!--end::Description=-->
 											</div>
 											<!--end::Section-->

@@ -61,7 +61,7 @@
                     <label class="required fw-semibold fs-6 mb-2">Jabatan</label>
                     <!--end::Label-->
                     <!--begin::Input-->
-                    <input type="text" class="form-control mb-3 mb-lg-0" value="{{ $item->pustakawan->jabatan->nama_jabatan }}" readonly/>
+                    <input type="text" class="form-control mb-3 mb-lg-0" value="{{ $item->pustakawan?->jabatan?->nama_jabatan ?? '-' }}" readonly/>
                     <!--end::Input-->
                 </div>
                 <!--end::Input group-->

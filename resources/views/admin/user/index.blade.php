@@ -108,7 +108,7 @@
                                                 <!--begin::User details-->
                                                 <div class="d-flex flex-column">
                                                     <div class="text-gray-800 mb-1">{{ $item->pustakawan->nama_pustakawan }}</div>
-                                                    <span>{{ $item->pustakawan->jabatan->nama_jabatan }}</span>
+                                                    <span>{{ $item->pustakawan?->jabatan?->nama_jabatan ?? '-' }}</span>
                                                 </div>
                                                 <!--begin::User details-->
                                             </td>

@@ -109,9 +109,9 @@ class WaNotifController extends Controller
     public function webhook(Request $request)
     {
 
-        Log::info('WEBHOOK MASUK', [
-            'all' => $request->all()
-        ]);
+        // Log::info('WEBHOOK MASUK', [
+        //     'all' => $request->all()
+        // ]);
 
         $pesanMasuk = strtolower($request->message ?? '');
         $pengirim = $request->sender ?? '';
@@ -140,11 +140,11 @@ class WaNotifController extends Controller
             Cache::put($messageId, true, now()->addMinutes(10));
         }
 
-        Log::info('PESAN MASUK', [
-            'pengirim' => $pengirim,
-            'pesan' => $pesanMasuk,
-            'lokasi' => $request->location,
-        ]);
+        // Log::info('PESAN MASUK', [
+        //     'pengirim' => $pengirim,
+        //     'pesan' => $pesanMasuk,
+        //     'lokasi' => $request->location,
+        // ]);
 
         $balasan = "";
 
@@ -187,10 +187,10 @@ class WaNotifController extends Controller
         // langsung kirim dan hentikan proses
         if ($balasan != '') {
 
-            Log::info('MENGIRIM BALASAN PRIORITAS', [
-                'target' => $pengirim,
-                'message' => $balasan
-            ]);
+            // Log::info('MENGIRIM BALASAN PRIORITAS', [
+            //     'target' => $pengirim,
+            //     'message' => $balasan
+            // ]);
 
             $token = config('fonnte.token');
 
@@ -229,10 +229,10 @@ class WaNotifController extends Controller
 
             } catch (\Exception $e) {
 
-                Log::error('ERROR MENU IZIN', [
-                    'message' => $e->getMessage(),
-                    'line' => $e->getLine()
-                ]);
+                // Log::error('ERROR MENU IZIN', [
+                //     'message' => $e->getMessage(),
+                //     'line' => $e->getLine()
+                // ]);
 
                 $balasan = "Terjadi kesalahan sistem.";
             }
@@ -416,10 +416,10 @@ class WaNotifController extends Controller
 
             } catch (\Throwable $e) {
 
-                Log::error('ERROR TANGGAL IZIN', [
-                    'message' => $e->getMessage(),
-                    'line' => $e->getLine()
-                ]);
+                // Log::error('ERROR TANGGAL IZIN', [
+                //     'message' => $e->getMessage(),
+                //     'line' => $e->getLine()
+                // ]);
 
                 $balasan = "Format tanggal tidak valid.";
             }
@@ -583,10 +583,10 @@ class WaNotifController extends Controller
 
         if ($balasan != "") {
 
-            Log::info('MENGIRIM BALASAN', [
-                'target' => $pengirim,
-                'message' => $balasan
-            ]);
+            // Log::info('MENGIRIM BALASAN', [
+            //     'target' => $pengirim,
+            //     'message' => $balasan
+            // ]);
 
             $token = env('FONNTE_TOKEN');
 
@@ -597,10 +597,10 @@ class WaNotifController extends Controller
                 'message' => $balasan,
             ]);
 
-            Log::info('RESPON FONNTE', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
+            // Log::info('RESPON FONNTE', [
+            //     'status' => $response->status(),
+            //     'body' => $response->body()
+            // ]);
         }
 
         return response('OK', 200);

@@ -105,7 +105,7 @@
 									<!--begin::Details item-->
 									<div class="fw-bold mt-5">Jabatan</div>
 									<div class="text-gray-600">
-										<span class="text-gray-600">{{ $user->pustakawan->jabatan->nama_jabatan }}</span>
+										<span class="text-gray-600">{{ $user->pustakawan?->jabatan?->nama_jabatan ?? '-' }}</span>
 									</div>
 									<!--begin::Details item-->
 									<!--begin::Details item-->

@@ -97,7 +97,7 @@
                                 <tr>
                                     <td></td>
                                     <td class="text-start">
-                                        <div class="px-4 py-3 badge fs-7 badge-light-success">{{ $item->jabatan->nama_jabatan }}</div>
+                                        <div class="px-4 py-3 badge fs-7 badge-light-success">{{ $item->jabatan?->nama_jabatan ?? '-' }}</div>
                                     </td>
                                     <td></td>
                                     <td class="text-center">Rp. {{ number_format($item->tunjangan_jabatan ?? 0, 0, ',', '.') }}</td>
