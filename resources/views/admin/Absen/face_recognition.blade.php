@@ -39,24 +39,6 @@
       animation: fadeInUp 0.8s ease;
     }
 
-    #camera-preview {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      max-height: 55vh;
-      object-fit: cover;
-      border-radius: 0.75rem;
-      background: #000;
-    }
-
-    #captured-photo {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      max-height: 55vh;
-      object-fit: contain;
-      border-radius: 0.75rem;
-      background: #000;
-    }
-
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -77,9 +59,6 @@
       .status-badge {
         font-size: 0.75rem;
         padding: 0.3rem 0.7rem;
-      }
-      #camera-preview, #captured-photo {
-        max-height: 45vh;
       }
     }
   </style>
@@ -126,30 +105,9 @@
       </button>
     </div>
 
-    <!-- Camera Section -->
-    <div id="camera-section" class="mb-3">
-      <div class="relative overflow-hidden rounded-xl bg-black/30" style="aspect-ratio: 4/3;">
-        <video id="camera-preview" autoplay playsinline muted class="absolute inset-0 w-full h-full"></video>
-        <img id="captured-photo" class="absolute inset-0 w-full h-full hidden" />
-      </div>
-      <div id="camera-controls" class="flex flex-wrap justify-center gap-2 mt-2">
-        <button type="button" id="btn-capture"
-          class="px-6 py-2.5 text-sm sm:text-base font-semibold text-blue-700 bg-white rounded-xl hover:bg-blue-100 transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-          disabled>
-          Ambil Foto
-        </button>
-        <button type="button" id="btn-switch-camera"
-          class="px-4 py-2.5 text-sm font-semibold text-white bg-white/20 rounded-xl hover:bg-white/30 transition active:scale-95 shadow-lg hidden"
-          onclick="switchCamera()">
-          Ganti Kamera
-        </button>
-      </div>
-    </div>
-
     <!-- Form -->
     <form class="form" method="POST" action="{{ route('struktural-proses') }}" id="absen-form">
       @csrf
-      <input type="hidden" name="foto" id="foto-input" />
       <input type="hidden" name="latitude" id="latitude-input" />
       <input type="hidden" name="longitude" id="longitude-input" />
       <div>
@@ -201,20 +159,14 @@
     const GEO_SETTINGS = @json($settings);
 
     let geoVerified = false;
-    let photoCaptured = false;
-    let cameraStream = null;
 
     const geoStatus = document.getElementById('geo-status');
-    const video = document.getElementById('camera-preview');
-    const capturedImg = document.getElementById('captured-photo');
-    const fotoInput = document.getElementById('foto-input');
     const latInput = document.getElementById('latitude-input');
     const lngInput = document.getElementById('longitude-input');
-    const btnCapture = document.getElementById('btn-capture');
     const btnSubmit = document.getElementById('btn-submit');
 
     function updateSubmitButton() {
-      btnSubmit.disabled = !(geoVerified && photoCaptured);
+      btnSubmit.disabled = !geoVerified;
     }
 
     // ========== GEOLOCATION ==========
@@ -385,125 +337,7 @@
       updateSubmitButton();
     }
 
-    // ========== CAMERA ==========
-    function isMobile() {
-      return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-
-    let cameraStarted = false;
-    let currentFacing = 'environment'; // 'user' = depan, 'environment' = belakang
-
-    async function startCamera(facing) {
-      if (cameraStarted && facing === undefined) return;
-      if (facing) currentFacing = facing;
-
-      // Stop existing stream before switching
-      stopCamera();
-      cameraStarted = false;
-
-      try {
-        const constraints = {
-          audio: false,
-          video: { facingMode: currentFacing, width: { ideal: 720 }, height: { ideal: 960 } }
-        };
-        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = cameraStream;
-        cameraStarted = true;
-        btnCapture.disabled = false;
-        document.getElementById('btn-start-camera')?.remove();
-        updateCameraUI();
-      } catch (err) {
-        if (err.name === 'OverconstrainedError' || err.name === 'NotFoundError') {
-          try {
-            cameraStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
-            video.srcObject = cameraStream;
-            cameraStarted = true;
-            btnCapture.disabled = false;
-            document.getElementById('btn-start-camera')?.remove();
-            updateCameraUI();
-            return;
-          } catch (_) {}
-        }
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          Swal.fire({
-            title: 'Akses kamera ditolak',
-            text: 'Izinkan akses kamera di pengaturan browser, lalu reload halaman.',
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#dc2626'
-          });
-        } else {
-          if (!document.getElementById('btn-start-camera')) {
-            const btn = document.createElement('button');
-            btn.id = 'btn-start-camera';
-            btn.type = 'button';
-            btn.className = 'w-full px-4 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg';
-            btn.textContent = 'Mulai Kamera';
-            btn.onclick = function (e) {
-              e.preventDefault();
-              startCamera();
-            };
-            document.getElementById('camera-controls').prepend(btn);
-          }
-        }
-      }
-    }
-
-    function switchCamera() {
-      currentFacing = currentFacing === 'user' ? 'environment' : 'user';
-      startCamera(currentFacing);
-    }
-
-    function updateCameraUI() {
-      const isFront = currentFacing === 'user';
-      video.style.transform = isFront ? 'scaleX(-1)' : 'scaleX(1)';
-      const btnSwitch = document.getElementById('btn-switch-camera');
-      if (btnSwitch) {
-        btnSwitch.textContent = isFront ? 'Kamera Belakang' : 'Kamera Depan';
-      }
-    }
-
-    function stopCamera() {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(function (track) { track.stop(); });
-        cameraStream = null;
-      }
-    }
-
-    btnCapture.addEventListener('click', function () {
-      const w = video.videoWidth || 640;
-      const h = video.videoHeight || 480;
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      // Mirror only front camera
-      const isFront = currentFacing === 'user';
-      if (isFront) {
-        ctx.translate(w, 0);
-        ctx.scale(-1, 1);
-      }
-      ctx.drawImage(video, 0, 0, w, h);
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-      fotoInput.value = dataUrl;
-      capturedImg.src = dataUrl;
-      capturedImg.classList.remove('hidden');
-      video.classList.add('hidden');
-      btnCapture.textContent = 'Foto Ulang';
-      photoCaptured = true;
-      updateSubmitButton();
-    });
-
-    video.addEventListener('click', function () {
-      photoCaptured = false;
-      capturedImg.classList.add('hidden');
-      video.classList.remove('hidden');
-      btnCapture.textContent = 'Ambil Foto';
-      fotoInput.value = '';
-      updateSubmitButton();
-    });
-
+    // ========== FORM SUBMIT ==========
     // Prevent form submit if conditions not met
     document.getElementById('absen-form').addEventListener('submit', function (e) {
       if (!geoVerified) {
@@ -517,50 +351,8 @@
         });
         return;
       }
-      if (!photoCaptured) {
-        e.preventDefault();
-        Swal.fire({
-          title: 'Astaghfirullah!',
-          text: 'Silakan ambil foto terlebih dahulu.',
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#dc2626'
-        });
-        return;
-      }
       btnSubmit.disabled = true;
       btnSubmit.textContent = 'Memproses...';
-    });
-
-    // Show switch camera button after camera starts
-    function onCameraStarted() {
-      const btnSwitch = document.getElementById('btn-switch-camera');
-      if (btnSwitch) btnSwitch.classList.remove('hidden');
-    }
-
-    // Start camera on load (on desktop it works immediately, on mobile requires user gesture)
-    if (isMobile()) {
-      currentFacing = 'environment';
-      const btn = document.createElement('button');
-      btn.id = 'btn-start-camera';
-      btn.type = 'button';
-      btn.className = 'w-full px-4 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg';
-      btn.textContent = 'Mulai Kamera';
-      btn.onclick = function (e) {
-        e.preventDefault();
-        startCamera(currentFacing);
-        onCameraStarted();
-      };
-      document.getElementById('camera-controls').prepend(btn);
-    } else {
-      currentFacing = 'user';
-      startCamera('user');
-      onCameraStarted();
-    }
-
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', function () {
-      stopCamera();
     });
   </script>
 

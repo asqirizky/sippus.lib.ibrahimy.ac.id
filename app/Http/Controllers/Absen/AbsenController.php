@@ -120,7 +120,6 @@ class AbsenController extends Controller
             'nik'       => 'required',
             'latitude'  => 'required|numeric',
             'longitude' => 'required|numeric',
-            'foto'      => 'required|string',
         ]);
 
         $pustakawan = Pustakawan::with('jabatan')
@@ -213,27 +212,12 @@ class AbsenController extends Controller
             return back()->with('error', 'Sudah absen pada jadwal_id ini');
         }
 
-        // Verifikasi foto cocok dengan foto master pustakawan
-        if (!empty($pustakawan->foto)) {
-            $verified = $this->verifyPhoto($request->foto, $pustakawan->foto);
-            if ($verified !== true) {
-                return back()->with('error', $verified);
-            }
-        }
-
-        // Save captured photo
-        $fotoName = $this->saveCapturedPhoto($request->foto);
-        if (!is_null($fotoName) && !str_starts_with($fotoName, 'absen_')) {
-            return back()->with('error', $fotoName);
-        }
-
         AbsenStruktural::create([
             'pustakawan_id' => $pustakawan->id,
             'jadwal_id'     => $jadwal->id,
             'tanggal'       => $tanggal,
             'jam_masuk'     => $jam,
             'keterangan'    => 'Hadir',
-            'foto'          => $fotoName,
             'koordinat'     => $request->latitude . ',' . $request->longitude,
         ]);
 
