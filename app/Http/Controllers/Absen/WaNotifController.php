@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Absen;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absen\AbsenStruktural;
+use App\Models\Izin\IzinPustakawan;
+use App\Models\Izin\IzinPustakawanJadwal;
 use App\Models\Master\Jadwal;
 use App\Models\Master\Pustakawan;
 use App\Models\Master\Ruang;
@@ -398,7 +400,7 @@ class WaNotifController extends Controller
 
             try {
 
-                $tanggal = Carbon::parse($request->message)->format('Y-m-d');
+                $tanggal = $this->parseTanggalWA($request->message)->format('Y-m-d');
 
                 $session->update([
                     'tanggal_mulai' => $tanggal,
@@ -425,125 +427,149 @@ class WaNotifController extends Controller
             }
         } elseif ($session && $session->step == 'tanggal_satu_hari_shift') {
 
-            $tanggal = Carbon::parse($request->message)->format('Y-m-d');
+            try {
 
-            $session->update([
-                'tanggal_mulai' => $tanggal,
-                'tanggal_selesai' => $tanggal
-            ]);
+                $tanggal = $this->parseTanggalWA($request->message)->format('Y-m-d');
 
-            $this->simpanIzinWA($pengirim, $session);
+                $session->update([
+                    'tanggal_mulai' => $tanggal,
+                    'tanggal_selesai' => $tanggal
+                ]);
 
-            $jadwal = Jadwal::find($session->jadwal_id);
+                $this->simpanIzinWA($pengirim, $session);
 
-            $balasan = "*Izin berhasil diproses*\n\n"
-                . "Keterangan : {$session->keterangan}\n"
-                . "Shift : " . ($jadwal->jadwal ?? '-') . "\n"
-                . "Tanggal : "
-                . Carbon::parse($tanggal)->format('d-m-Y');
+                $jadwal = Jadwal::find($session->jadwal_id);
 
-            $session->delete();
+                $balasan = "*Izin berhasil diproses*\n\n"
+                    . "Keterangan : {$session->keterangan}\n"
+                    . "Shift : " . ($jadwal->jadwal ?? '-') . "\n"
+                    . "Tanggal : "
+                    . Carbon::parse($tanggal)->format('d-m-Y');
+
+                $session->delete();
+
+            } catch (\Throwable $e) {
+
+                $balasan = "Format tanggal tidak valid.";
+            }
 
         } elseif ($session && $session->step == 'tanggal_beberapa_hari_full') {
 
-            [$mulai, $selesai] = explode('s/d', strtolower($request->message));
+            try {
 
-            $session->update([
-                'tanggal_mulai' => Carbon::parse(trim($mulai))->format('Y-m-d'),
-                'tanggal_selesai' => Carbon::parse(trim($selesai))->format('Y-m-d')
-            ]);
+                [$mulai, $selesai] = $this->parseRentangTanggalWA($request->message);
 
-            $this->simpanIzinWA($pengirim, $session);
+                $session->update([
+                    'tanggal_mulai' => $mulai->format('Y-m-d'),
+                    'tanggal_selesai' => $selesai->format('Y-m-d')
+                ]);
 
-            $balasan = "*Izin berhasil diproses*\n\n"
-                . "Keterangan : {$session->keterangan}\n"
-                . "Tanggal : "
-                . Carbon::parse($session->tanggal_mulai)->format('d-m-Y')
-                . " s/d "
-                . Carbon::parse($session->tanggal_selesai)->format('d-m-Y');
+                $this->simpanIzinWA($pengirim, $session);
 
-            $session->delete();
+                $balasan = "*Izin berhasil diproses*\n\n"
+                    . "Keterangan : {$session->keterangan}\n"
+                    . "Tanggal : "
+                    . Carbon::parse($session->tanggal_mulai)->format('d-m-Y')
+                    . " s/d "
+                    . Carbon::parse($session->tanggal_selesai)->format('d-m-Y');
+
+                $session->delete();
+
+            } catch (\Throwable $e) {
+
+                $balasan = "Format tanggal tidak valid.";
+            }
 
         } elseif ($session && $session->step == 'tanggal_beberapa_hari_shift') {
 
-            [$mulai, $selesai] = explode('s/d', strtolower($request->message));
+            try {
 
-            $session->update([
-                'tanggal_mulai' => Carbon::parse(trim($mulai))->format('Y-m-d'),
-                'tanggal_selesai' => Carbon::parse(trim($selesai))->format('Y-m-d'),
-                'step' => 'pilih_shift_beberapa_hari'
-            ]);
+                [$mulai, $selesai] = $this->parseRentangTanggalWA($request->message);
 
-            $nomor = preg_replace('/[^0-9]/', '', $pengirim);
+                $session->update([
+                    'tanggal_mulai' => $mulai->format('Y-m-d'),
+                    'tanggal_selesai' => $selesai->format('Y-m-d'),
+                    'step' => 'pilih_shift_beberapa_hari'
+                ]);
 
-            if (str_starts_with($nomor, '62')) {
-                $nomor = '0' . substr($nomor, 2);
+            } catch (\Throwable $e) {
+
+                $balasan = "Format tanggal tidak valid.";
             }
 
-            $pustakawan = Pustakawan::whereRaw(
-                "REPLACE(no_wa,' ','') LIKE ?",
-                ['%' . substr($nomor, -10)]
-            )->first();
+            if ($balasan == '') {
 
-            $hari = now()->locale('id')->translatedFormat('l');
+                $nomor = preg_replace('/[^0-9]/', '', $pengirim);
 
-            $jadwal = DB::table('pustakawan_jadwal')
-                ->where('pustakawan_id', $pustakawan->id)
-                ->where('hari', $hari)
-                ->first();
-
-            if (!$jadwal) {
-                $balasan = "Jadwal hari ini tidak ditemukan.";
-            } else {
-                $mapping = [];
-                $balasan = "*Silahkan ketik angka untuk memilih shift*\n\n";
-                $no = 1;
-
-                $jadwalPagi  = Jadwal::where('jadwal', 'Pagi')->first();
-                $jadwalSiang = Jadwal::where('jadwal', 'Siang')->first();
-                $jadwalMalam = Jadwal::where('jadwal', 'Malam')->first();
-
-                if ($jadwal->pagi == 1 && $jadwalPagi) {
-
-                    $balasan .= $no . ". Pagi\n";
-                    $mapping[$no] = [
-                        'id' => $jadwalPagi->id,
-                        'nama' => 'Pagi'
-                    ];
-
-                    $no++;
+                if (str_starts_with($nomor, '62')) {
+                    $nomor = '0' . substr($nomor, 2);
                 }
 
-                if ($jadwal->siang == 1 && $jadwalSiang) {
+                $pustakawan = Pustakawan::whereRaw(
+                    "REPLACE(no_wa,' ','') LIKE ?",
+                    ['%' . substr($nomor, -10)]
+                )->first();
 
-                    $balasan .= $no . ". Siang\n";
+                $hari = now()->locale('id')->translatedFormat('l');
 
-                    $mapping[$no] = [
-                        'id' => $jadwalSiang->id,
-                        'nama' => 'Siang'
-                    ];
+                $jadwal = DB::table('pustakawan_jadwal')
+                    ->where('pustakawan_id', $pustakawan->id)
+                    ->where('hari', $hari)
+                    ->first();
 
-                    $no++;
-                }
-
-                if ($jadwal->malam == 1 && $jadwalMalam) {
-
-                    $balasan .= $no . ". Malam\n";
-
-                    $mapping[$no] = [
-                        'id' => $jadwalMalam->id,
-                        'nama' => 'Malam'
-                    ];
-
-                    $no++;
-                }
-
-                if (empty($mapping)) {
-                    $balasan = "Anda tidak memiliki jadwal shift pada hari ini.";
+                if (!$jadwal) {
+                    $balasan = "Jadwal hari ini tidak ditemukan.";
                 } else {
-                    $session->update([
-                        'shift_mapping' => json_encode($mapping)
-                    ]);
+                    $mapping = [];
+                    $balasan = "*Silahkan ketik angka untuk memilih shift*\n\n";
+                    $no = 1;
+
+                    $jadwalPagi  = Jadwal::where('jadwal', 'Pagi')->first();
+                    $jadwalSiang = Jadwal::where('jadwal', 'Siang')->first();
+                    $jadwalMalam = Jadwal::where('jadwal', 'Malam')->first();
+
+                    if ($jadwal->pagi == 1 && $jadwalPagi) {
+
+                        $balasan .= $no . ". Pagi\n";
+                        $mapping[$no] = [
+                            'id' => $jadwalPagi->id,
+                            'nama' => 'Pagi'
+                        ];
+
+                        $no++;
+                    }
+
+                    if ($jadwal->siang == 1 && $jadwalSiang) {
+
+                        $balasan .= $no . ". Siang\n";
+
+                        $mapping[$no] = [
+                            'id' => $jadwalSiang->id,
+                            'nama' => 'Siang'
+                        ];
+
+                        $no++;
+                    }
+
+                    if ($jadwal->malam == 1 && $jadwalMalam) {
+
+                        $balasan .= $no . ". Malam\n";
+
+                        $mapping[$no] = [
+                            'id' => $jadwalMalam->id,
+                            'nama' => 'Malam'
+                        ];
+
+                        $no++;
+                    }
+
+                    if (empty($mapping)) {
+                        $balasan = "Anda tidak memiliki jadwal shift pada hari ini.";
+                    } else {
+                        $session->update([
+                            'shift_mapping' => json_encode($mapping)
+                        ]);
+                    }
                 }
             }
 
@@ -645,6 +671,27 @@ class WaNotifController extends Controller
             throw new \Exception('Pustakawan tidak ditemukan');
         }
 
+        // Pustakawan ruang 6 & 7 = Viar, jabatan 26 (non Viar) = Tenaga Khidmah.
+        // Keduanya disimpan ke tabel izin_pustakawans sesuai tipe masing-masing,
+        // agar muncul di halaman admin Viar / Tenaga Khidmah.
+        $tipe = null;
+
+        if (in_array($pustakawan->ruang_id, [6, 7])) {
+            $tipe = 'viar';
+        } elseif ($pustakawan->jabatan_id == 26) {
+            $tipe = 'tenaga_khidmah';
+        }
+
+        if ($tipe) {
+            $this->simpanIzinPustakawanWA($pustakawan, $session, $tipe);
+            return;
+        }
+
+        $this->simpanIzinStrukturalWA($pustakawan, $session);
+    }
+
+    private function simpanIzinStrukturalWA($pustakawan, $session)
+    {
         DB::transaction(function () use ($session, $pustakawan) {
 
             $izin = IzinStruktural::create([
@@ -677,57 +724,181 @@ class WaNotifController extends Controller
 
                 } else {
 
-                    $hariMap = [
-                        'Monday' => 'Senin',
-                        'Tuesday' => 'Selasa',
-                        'Wednesday' => 'Rabu',
-                        'Thursday' => 'Kamis',
-                        'Friday' => 'Jumat',
-                        'Saturday' => 'Sabtu',
-                        'Sunday' => 'Minggu',
-                    ];
-
-                    $hari = $hariMap[$tanggal->format('l')];
-
-                    $jadwal = DB::table('pustakawan_jadwal')
-                        ->where('pustakawan_id', $pustakawan->id)
-                        ->where('hari', $hari)
-                        ->first();
-
-                    if (!$jadwal) {
-                        continue;
-                    }
-
-                    $pagiId = Jadwal::where('jadwal', 'Pagi')->value('id');
-                    $siangId = Jadwal::where('jadwal', 'Siang')->value('id');
-                    $malamId = Jadwal::where('jadwal', 'Malam')->value('id');
-
-                    if ($jadwal->pagi == 1) {
+                    foreach ($this->daftarJadwalHariWA($pustakawan, $tanggal) as $jadwalId) {
                         IzinStrukturalJadwal::create([
                             'izin_struktural_id' => $izin->id,
-                            'jadwal_id'          => $pagiId,
-                            'tanggal'            => $tanggal->format('Y-m-d'),
-                        ]);
-                    }
-
-                    if ($jadwal->siang == 1) {
-                        IzinStrukturalJadwal::create([
-                            'izin_struktural_id' => $izin->id,
-                            'jadwal_id'          => $siangId,
-                            'tanggal'            => $tanggal->format('Y-m-d'),
-                        ]);
-                    }
-
-                    if ($jadwal->malam == 1) {
-                        IzinStrukturalJadwal::create([
-                            'izin_struktural_id' => $izin->id,
-                            'jadwal_id'          => $malamId,
+                            'jadwal_id'          => $jadwalId,
                             'tanggal'            => $tanggal->format('Y-m-d'),
                         ]);
                     }
                 }
             }
         });
+    }
+
+    private function simpanIzinPustakawanWA($pustakawan, $session, $tipe)
+    {
+        DB::transaction(function () use ($session, $pustakawan, $tipe) {
+
+            $izin = IzinPustakawan::create([
+                'pustakawan_id'   => $pustakawan->id,
+                'tipe_izin'       => $tipe,
+                'tanggal_mulai'   => $session->tanggal_mulai,
+                'tanggal_selesai' => $session->tanggal_selesai,
+                'keterangan'      => $session->keterangan,
+            ]);
+
+            $periode = CarbonPeriod::create(
+                $session->tanggal_mulai,
+                $session->tanggal_selesai
+            );
+
+            foreach ($periode as $tanggal) {
+
+                // izin per shift
+                if (
+                    in_array(
+                        $session->mode,
+                        ['satu_hari_shift', 'beberapa_hari_shift']
+                    )
+                ) {
+
+                    IzinPustakawanJadwal::create([
+                        'izin_pustakawan_id' => $izin->id,
+                        'jadwal_id'          => $session->jadwal_id,
+                        'tanggal'            => $tanggal->format('Y-m-d'),
+                        'tipe_jadwal'        => $tipe,
+                    ]);
+
+                } else {
+
+                    foreach ($this->daftarJadwalHariWA($pustakawan, $tanggal) as $jadwalId) {
+                        IzinPustakawanJadwal::create([
+                            'izin_pustakawan_id' => $izin->id,
+                            'jadwal_id'          => $jadwalId,
+                            'tanggal'            => $tanggal->format('Y-m-d'),
+                            'tipe_jadwal'        => $tipe,
+                        ]);
+                    }
+                }
+            }
+        });
+    }
+
+    private function daftarJadwalHariWA($pustakawan, $tanggal)
+    {
+        $hariMap = [
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu',
+        ];
+
+        $hari = $hariMap[$tanggal->format('l')];
+
+        $jadwal = DB::table('pustakawan_jadwal')
+            ->where('pustakawan_id', $pustakawan->id)
+            ->where('hari', $hari)
+            ->first();
+
+        if (!$jadwal) {
+            return [];
+        }
+
+        $ids = [];
+
+        $pagiId  = Jadwal::where('jadwal', 'Pagi')->value('id');
+        $siangId = Jadwal::where('jadwal', 'Siang')->value('id');
+        $malamId = Jadwal::where('jadwal', 'Malam')->value('id');
+
+        if ($jadwal->pagi == 1 && $pagiId) {
+            $ids[] = $pagiId;
+        }
+
+        if ($jadwal->siang == 1 && $siangId) {
+            $ids[] = $siangId;
+        }
+
+        if ($jadwal->malam == 1 && $malamId) {
+            $ids[] = $malamId;
+        }
+
+        return $ids;
+    }
+
+    private function parseTanggalWA($pesan)
+    {
+        $teks = trim($pesan);
+
+        $tanggal = $this->cobaParseTanggalWA($teks);
+
+        if ($tanggal) {
+            return $tanggal;
+        }
+
+        // Normalisasi nama bulan Indonesia -> Inggris
+        $bulanMap = [
+            'januari' => 'January',
+            'februari' => 'February',
+            'maret' => 'March',
+            'april' => 'April',
+            'mei' => 'May',
+            'juni' => 'June',
+            'juli' => 'July',
+            'agustus' => 'August',
+            'september' => 'September',
+            'oktober' => 'October',
+            'november' => 'November',
+            'desember' => 'December',
+        ];
+
+        $asli = $teks;
+        $teks = str_ireplace(array_keys($bulanMap), array_values($bulanMap), $teks);
+
+        $tanggal = $this->cobaParseTanggalWA($teks);
+
+        if ($tanggal) {
+            return $tanggal;
+        }
+
+        throw new \Exception("Format tanggal tidak valid: $asli");
+    }
+
+    private function parseRentangTanggalWA($pesan)
+    {
+        $pecah = preg_split('/\s*(?:s\/d|sd|sampai|sampai dengan|hingga|-|–)\s*/i', trim($pesan));
+
+        if (count($pecah) < 2) {
+            throw new \Exception('Format rentang tanggal tidak valid');
+        }
+
+        $mulai = $this->parseTanggalWA($pecah[0]);
+        $selesai = $this->parseTanggalWA($pecah[count($pecah) - 1]);
+
+        if ($selesai->lt($mulai)) {
+            throw new \Exception('Tanggal selesai lebih awal dari tanggal mulai');
+        }
+
+        return [$mulai, $selesai];
+    }
+
+    private function cobaParseTanggalWA($teks)
+    {
+        // d/m/Y atau d-m-Y (dd/mm/yyyy)
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', trim($teks), $m)) {
+            return Carbon::createFromFormat('d/m/Y', "{$m[1]}/{$m[2]}/{$m[3]}");
+        }
+
+        // d-m-Y (dd-mm-yyyy) sudah tertangkap pola di atas
+        // Nama bulan: 1 Juni 2026, 1 Juni, 2026-06-01, dll
+        try {
+            return Carbon::parse($teks);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     // destroy geofencing
